@@ -1,81 +1,85 @@
 require_relative '../../lib/responder'
 
-class ReviewersDueDateResponder < Responder
+module Ropensci
+  class ReviewersDueDateResponder < Responder
 
-  def define_listening
-    @event_action = "issue_comment.created"
-    @event_regex = /\A@#{@bot_name} (add|remove) (\S+) (as reviewer|to reviewers|from reviewers)\s*\z/i
-  end
+    keyname :ropensci_reviewers
 
-  def process_message(message)
-    add_or_remove = @match_data[1].downcase
-    reviewer = @match_data[2]
-    to_or_from = @match_data[3].downcase
-
-    if !issue_body_has?("reviewers-list")
-      respond("I can't find the reviewers list")
-      return
+    def define_listening
+      @event_action = "issue_comment.created"
+      @event_regex = /\A@#{@bot_name} (add|remove) (\S+) (as reviewer|to reviewers|from reviewers)\s*\z/i
     end
 
-    add_to_or_remove_from = [add_or_remove, to_or_from].join(" ")
+    def process_message(message)
+      add_or_remove = @match_data[1].downcase
+      reviewer = @match_data[2]
+      to_or_from = @match_data[3].downcase
 
-    if ["add to reviewers", "add as reviewer"].include?(add_to_or_remove_from)
-      add reviewer
-    elsif add_to_or_remove_from == "remove from reviewers"
-      remove reviewer
-    else
-      respond("That command is confusing. Did you mean to ADD TO reviewers or to REMOVE FROM reviewers?")
+      if !issue_body_has?("reviewers-list")
+        respond("I can't find the reviewers list")
+        return
+      end
+
+      add_to_or_remove_from = [add_or_remove, to_or_from].join(" ")
+
+      if ["add to reviewers", "add as reviewer"].include?(add_to_or_remove_from)
+        add reviewer
+      elsif add_to_or_remove_from == "remove from reviewers"
+        remove reviewer
+      else
+        respond("That command is confusing. Did you mean to ADD TO reviewers or to REMOVE FROM reviewers?")
+      end
     end
-  end
 
-  def add(reviewer)
-    if list_of_values.include?(reviewer)
-      respond("#{reviewer} is already included in the reviewers list")
-    else
-      new_list = (list_of_values + [reviewer]).uniq.join(", ")
-      update_list("reviewers", new_list)
-      respond("#{reviewer} added to the reviewers list!")
-      add_collaborator(reviewer) if add_as_collaborator?(reviewer)
-      add_assignee(reviewer) if add_as_assignee?(reviewer)
-      process_labeling if list_of_values.empty?
+    def add(reviewer)
+      if list_of_values.include?(reviewer)
+        respond("#{reviewer} is already included in the reviewers list")
+      else
+        new_list = (list_of_values + [reviewer]).uniq.join(", ")
+        update_list("reviewers", new_list)
+        respond("#{reviewer} added to the reviewers list!")
+        add_collaborator(reviewer) if add_as_collaborator?(reviewer)
+        add_assignee(reviewer) if add_as_assignee?(reviewer)
+        process_labeling if list_of_values.empty?
+      end
     end
-  end
 
-  def remove(reviewer)
-    if list_of_values.include?(reviewer)
-      new_list = (list_of_values - [reviewer]).uniq.join(", ")
-      update_list("reviewers", new_list)
-      respond("#{reviewer} removed from the reviewers list!")
-      remove_assignee(reviewer) if add_as_assignee?(reviewer)
-      process_reverse_labeling if new_list.empty?
-    else
-      respond("#{reviewer} is not in the reviewers list")
+    def remove(reviewer)
+      if list_of_values.include?(reviewer)
+        new_list = (list_of_values - [reviewer]).uniq.join(", ")
+        update_list("reviewers", new_list)
+        respond("#{reviewer} removed from the reviewers list!")
+        remove_assignee(reviewer) if add_as_assignee?(reviewer)
+        process_reverse_labeling if new_list.empty?
+      else
+        respond("#{reviewer} is not in the reviewers list")
+      end
     end
-  end
 
-  def list_of_values
-    @list_of_values ||= read_value_from_body("reviewers-list").split(",").map(&:strip)-[no_reviewer_text]
-  end
+    def list_of_values
+      @list_of_values ||= read_value_from_body("reviewers-list").split(",").map(&:strip)-[no_reviewer_text]
+    end
 
-  def no_reviewer_text
-    params[:no_reviewer_text] || 'TBD'
-  end
+    def no_reviewer_text
+      params[:no_reviewer_text] || 'TBD'
+    end
 
-  def add_as_collaborator?(value)
-    username?(value) && params[:add_as_collaborator] == true
-  end
+    def add_as_collaborator?(value)
+      username?(value) && params[:add_as_collaborator] == true
+    end
 
-  def add_as_assignee?(value)
-    username?(value) && params[:add_as_assignee] == true
-  end
+    def add_as_assignee?(value)
+      username?(value) && params[:add_as_assignee] == true
+    end
 
-  def description
-    ["Add a user to this issue's reviewers list",
-     "Remove a user from the reviewers list"]
-  end
+    def description
+      ["Add a user to this issue's reviewers list",
+       "Remove a user from the reviewers list"]
+    end
 
-  def example_invocation
-    ["@#{@bot_name} add #{params[:sample_value] || 'xxxxx'} to reviewers",
-     "@#{@bot_name} remove #{params[:sample_value] || 'xxxxx'} from reviewers"]
+    def example_invocation
+      ["@#{@bot_name} add #{params[:sample_value] || 'xxxxx'} to reviewers",
+       "@#{@bot_name} remove #{params[:sample_value] || 'xxxxx'} from reviewers"]
+    end
   end
 end

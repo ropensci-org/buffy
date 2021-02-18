@@ -1,6 +1,6 @@
 require_relative "../../spec_helper.rb"
 
-describe ReviewersDueDateResponder do
+describe Ropensci::ReviewersDueDateResponder do
 
   subject do
     described_class
