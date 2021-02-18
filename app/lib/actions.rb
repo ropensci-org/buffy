@@ -7,24 +7,24 @@ module Actions
 
   # Update the body of the issue between marks
   def update_body(start_mark, end_mark, new_text)
-    new_body = issue_body.gsub(/#{start_mark}.*#{end_mark}/im, "#{start_mark}#{new_text}#{end_mark}")
-    update_issue({ body: new_body })
+    @issue_body = issue_body.gsub(/#{start_mark}.*#{end_mark}/im, "#{start_mark}#{new_text}#{end_mark}")
+    update_issue({ body: @issue_body })
   end
 
   # Add text at the end of the body of the issue
   def append_to_body(text)
-    new_body = issue_body + text
-    update_issue({ body: new_body })
+    @issue_body = issue_body + text
+    update_issue({ body: @issue_body })
   end
 
   # Remove a block of text from the body of the issue optionally including start/end marks
   def delete_from_body(start_mark, end_mark, delete_marks=false)
     if delete_marks
-      new_body = issue_body.gsub(/#{start_mark}.*#{end_mark}/im, "")
+      @issue_body = issue_body.gsub(/#{start_mark}.*#{end_mark}/im, "")
     else
-      new_body = issue_body.gsub(/#{start_mark}.*#{end_mark}/im, "#{start_mark}#{end_mark}")
+      @issue_body = issue_body.gsub(/#{start_mark}.*#{end_mark}/im, "#{start_mark}#{end_mark}")
     end
-    update_issue({ body: new_body })
+    update_issue({ body: @issue_body })
   end
 
   # Invite a user to collaborate in the repo
@@ -83,9 +83,7 @@ module Actions
 
   # Update list in issue's body between HTML comments
   def update_list(list_name, text)
-    start_mark = "<!--#{list_name}-list-->"
-    end_mark = "<!--end-#{list_name}-list-->"
-    update_body(start_mark, end_mark, text)
+    update_value("#{list_name}-list", text)
   end
 
   # Replace an assigned user from the assignees list of the issue
