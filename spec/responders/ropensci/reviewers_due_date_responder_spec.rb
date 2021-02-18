@@ -116,6 +116,82 @@ describe Ropensci::ReviewersDueDateResponder do
         @responder.process_message(@msg)
       end
     end
+
+    describe "process labels" do
+      describe "adding labels" do
+        before do
+          @msg = "@ropensci-review-bot add @maelle to reviewers"
+          @responder.match_data = @responder.event_regex.match(@msg)
+        end
+
+        it "should not happen with less than two reviewers" do
+          issue_body = "...Reviewers: <!--reviewers-list--><!--end-reviewers-list--> ..."
+          allow(@responder).to receive(:issue_body).and_return(issue_body)
+
+          expect(@responder).to_not receive(:process_labeling)
+          expect(@responder).to_not receive(:process_reverse_labeling)
+
+          @responder.process_message(@msg)
+        end
+
+        it "should not happen with more than two reviewers" do
+          issue_body = "...Reviewers: <!--reviewers-list-->@karthik, @mpadge<!--end-reviewers-list--> ..."
+          allow(@responder).to receive(:issue_body).and_return(issue_body)
+
+          expect(@responder).to_not receive(:process_labeling)
+          expect(@responder).to_not receive(:process_reverse_labeling)
+
+          @responder.process_message(@msg)
+        end
+
+        it "should happen when the second reviewer is assigned" do
+          issue_body = "...Reviewers: <!--reviewers-list-->@karthik<!--end-reviewers-list--> ..."
+          allow(@responder).to receive(:issue_body).and_return(issue_body)
+
+          expect(@responder).to receive(:process_labeling)
+          expect(@responder).to_not receive(:process_reverse_labeling)
+
+          @responder.process_message(@msg)
+        end
+      end
+
+      describe "removing labels" do
+        before do
+          @msg = "@ropensci-review-bot remove @maelle from reviewers"
+          @responder.match_data = @responder.event_regex.match(@msg)
+        end
+
+        it "should not happen with less than two reviewers" do
+          issue_body = "...Reviewers: <!--reviewers-list-->@maelle<!--end-reviewers-list--> ..."
+          allow(@responder).to receive(:issue_body).and_return(issue_body)
+
+          expect(@responder).to_not receive(:process_reverse_labeling)
+          expect(@responder).to_not receive(:process_labeling)
+
+          @responder.process_message(@msg)
+        end
+
+        it "should not happen with more than two reviewers" do
+          issue_body = "...Reviewers: <!--reviewers-list-->@karthik, @mpadge, @maelle<!--end-reviewers-list--> ..."
+          allow(@responder).to receive(:issue_body).and_return(issue_body)
+
+          expect(@responder).to_not receive(:process_reverse_labeling)
+          expect(@responder).to_not receive(:process_labeling)
+
+          @responder.process_message(@msg)
+        end
+
+        it "should happen when the second reviewer is removed" do
+          issue_body = "...Reviewers: <!--reviewers-list-->@karthik, @maelle<!--end-reviewers-list--> ..."
+          allow(@responder).to receive(:issue_body).and_return(issue_body)
+
+          expect(@responder).to receive(:process_reverse_labeling)
+          expect(@responder).to_not receive(:process_labeling)
+
+          @responder.process_message(@msg)
+        end
+      end
+    end
   end
 
   describe "#add_as_collaborator?" do

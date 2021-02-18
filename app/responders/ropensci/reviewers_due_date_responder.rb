@@ -35,22 +35,23 @@ module Ropensci
       if list_of_values.include?(reviewer)
         respond("#{reviewer} is already included in the reviewers list")
       else
-        new_list = (list_of_values + [reviewer]).uniq.join(", ")
-        update_list("reviewers", new_list)
+        new_list = (list_of_values + [reviewer]).uniq
+        update_list("reviewers", new_list.join(", "))
         respond("#{reviewer} added to the reviewers list!")
         add_collaborator(reviewer) if add_as_collaborator?(reviewer)
         add_assignee(reviewer) if add_as_assignee?(reviewer)
-        process_labeling if list_of_values.empty?
+        process_labeling if new_list.size == 2
       end
     end
 
     def remove(reviewer)
       if list_of_values.include?(reviewer)
-        new_list = (list_of_values - [reviewer]).uniq.join(", ")
-        update_list("reviewers", new_list)
+        new_list = (list_of_values - [reviewer]).uniq
+        updated_list = new_list.empty? ? no_reviewer_text : new_list.join(", ")
+        update_list("reviewers", updated_list)
         respond("#{reviewer} removed from the reviewers list!")
         remove_assignee(reviewer) if add_as_assignee?(reviewer)
-        process_reverse_labeling if new_list.empty?
+        process_reverse_labeling if new_list.size == 1
       else
         respond("#{reviewer} is not in the reviewers list")
       end
