@@ -51,6 +51,10 @@ buffy:
       if:
         role_assigned: editor
       no_reviewer_text: "TBD"
+      add_labels:
+        - 3/reviewer(s)-assigned
+      remove_labels:
+        - 2/seeking-reviewer(s)
     assign_editor:
       message: "The editor guide can be found at https://devguide.ropensci.org/editorguide.html#editorchecklist"
       only:
