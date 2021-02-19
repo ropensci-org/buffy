@@ -28,27 +28,40 @@ describe Ropensci::ReviewersDueDateResponder do
       disable_github_calls_for(@responder)
     end
 
-    describe "adding to list" do
+    describe "adding user as reviewer" do
       before do
         @msg = "@ropensci-review-bot add @xuanxu to reviewers"
         @responder.match_data = @responder.event_regex.match(@msg)
+        @new_due_date = (Time.now + 21 * 86400).strftime("%Y-%m-%d")
 
-        issue_body = "...Reviewers: <!--reviewers-list-->@maelle<!--end-reviewers-list--> ..."
+        issue_body = "...Reviewers: <!--reviewers-list-->@maelle<!--end-reviewers-list-->" +
+                     "<!--due-dates-list-->Due date for @maelle: 2121-12-31<!--end-due-dates-list--> ..."
         allow(@responder).to receive(:issue_body).and_return(issue_body)
       end
 
-      it "should add value to the list in the body of the issue" do
-        expected_new_body = "...Reviewers: <!--reviewers-list-->@maelle, @xuanxu<!--end-reviewers-list--> ..."
-        expect(@responder).to receive(:update_issue).with({ body: expected_new_body })
+      it "should add reviewer and due date in the body of the issue" do
+        expected_new_reviewers_list = "@maelle, @xuanxu"
+        expected_new_due_dates_list = "Due date for @maelle: 2121-12-31\nDue date for @xuanxu: #{@new_due_date}"
+        expect(@responder).to receive(:update_list).with("reviewers", expected_new_reviewers_list)
+        expect(@responder).to receive(:update_list).with("due-dates", expected_new_due_dates_list)
+        @responder.process_message(@msg)
+      end
+
+      it "due date is configurable via settings" do
+        @responder.params[:due_date_days] = 10
+        due_date = (Time.now + 10 * 86400).strftime("%Y-%m-%d")
+        expect(due_date.strip).to_not be_empty
+        expect(due_date).to_not eq(@new_due_date)
+        expect(@responder).to receive(:respond).with("@xuanxu added to the reviewers list. Review due date is #{due_date}")
         @responder.process_message(@msg)
       end
 
       it "should respond to github" do
-        expect(@responder).to receive(:respond).with("@xuanxu added to the reviewers list!")
+        expect(@responder).to receive(:respond).with("@xuanxu added to the reviewers list. Review due date is #{@new_due_date}")
         @responder.process_message(@msg)
       end
 
-      it "should not add value if already present in the list" do
+      it "should not add reviewer if already present in the list" do
         msg = "@ropensci-review-bot add @maelle to reviewers"
         @responder.match_data = @responder.event_regex.match(msg)
         expect(@responder).to_not receive(:update_issue)
@@ -77,18 +90,20 @@ describe Ropensci::ReviewersDueDateResponder do
       end
     end
 
-    describe "removing from list" do
+    describe "removing a reviewer" do
       before do
         @msg = "@ropensci-review-bot remove @maelle from reviewers"
         @responder.match_data = @responder.event_regex.match(@msg)
 
-        issue_body = "...Reviewers: <!--reviewers-list-->@karthik, @maelle<!--end-reviewers-list--> ..."
+        issue_body = "...Reviewers: <!--reviewers-list-->@karthik, @maelle<!--end-reviewers-list--> ..." +
+                     "<!--due-dates-list-->Due date for @karthik: 2121-11-31\n" +
+                     "Due date for @maelle: 2121-12-31<!--end-due-dates-list--> ..."
         allow(@responder).to receive(:issue_body).and_return(issue_body)
       end
 
-      it "should remove value from the list in the body of the issue" do
-        expected_new_body = "...Reviewers: <!--reviewers-list-->@karthik<!--end-reviewers-list--> ..."
-        expect(@responder).to receive(:update_issue).with({ body: expected_new_body })
+      it "should remove reviewer and due date from the body of the issue" do
+        expect(@responder).to receive(:update_list).with("reviewers", "@karthik")
+        expect(@responder).to receive(:update_list).with("due-dates", "Due date for @karthik: 2121-11-31")
         @responder.process_message(@msg)
       end
 
@@ -97,7 +112,7 @@ describe Ropensci::ReviewersDueDateResponder do
         @responder.process_message(@msg)
       end
 
-      it "should not remove value if not present in the list" do
+      it "should not remove reviewer if not present in the list" do
         msg = "@ropensci-review-bot remove @other_user from reviewers"
         @responder.match_data = @responder.event_regex.match(msg)
         expect(@responder).to_not receive(:update_issue)
@@ -233,16 +248,13 @@ describe Ropensci::ReviewersDueDateResponder do
   end
 
   describe "documentation" do
-    before do
-      @responder.params = { sample_value: "@reviewer_username" }
-    end
-
-    it "#description should include name" do
+    it "#description should include adding and removing reviewers" do
       expect(@responder.description[0]).to eq("Add a user to this issue's reviewers list")
       expect(@responder.description[1]).to eq("Remove a user from the reviewers list")
     end
 
     it "#example_invocation should use custom sample value if present" do
+      @responder.params = { sample_value: "@reviewer_username" }
       expect(@responder.example_invocation[0]).to eq("@ropensci-review-bot add @reviewer_username to reviewers")
       expect(@responder.example_invocation[1]).to eq("@ropensci-review-bot remove @reviewer_username from reviewers")
     end

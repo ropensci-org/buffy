@@ -32,12 +32,13 @@ module Ropensci
     end
 
     def add(reviewer)
-      if list_of_values.include?(reviewer)
+      if list_of_reviewers.include?(reviewer)
         respond("#{reviewer} is already included in the reviewers list")
       else
-        new_list = (list_of_values + [reviewer]).uniq
+        new_list = (list_of_reviewers + [reviewer]).uniq
         update_list("reviewers", new_list.join(", "))
-        respond("#{reviewer} added to the reviewers list!")
+        update_list("due-dates", add_reviewer_due_date(reviewer).join("\n"))
+        respond("#{reviewer} added to the reviewers list. Review due date is #{due_date}")
         add_collaborator(reviewer) if add_as_collaborator?(reviewer)
         add_assignee(reviewer) if add_as_assignee?(reviewer)
         process_labeling if new_list.size == 2
@@ -45,9 +46,10 @@ module Ropensci
     end
 
     def remove(reviewer)
-      if list_of_values.include?(reviewer)
-        new_list = (list_of_values - [reviewer]).uniq
+      if list_of_reviewers.include?(reviewer)
+        new_list = (list_of_reviewers - [reviewer]).uniq
         updated_list = new_list.empty? ? no_reviewer_text : new_list.join(", ")
+        update_list("due-dates", remove_reviewer_due_date(reviewer).join("\n"))
         update_list("reviewers", updated_list)
         respond("#{reviewer} removed from the reviewers list!")
         remove_assignee(reviewer) if add_as_assignee?(reviewer)
@@ -57,12 +59,31 @@ module Ropensci
       end
     end
 
-    def list_of_values
-      @list_of_values ||= read_value_from_body("reviewers-list").split(",").map(&:strip)-[no_reviewer_text]
+    def list_of_reviewers
+      @list_of_reviewers ||= read_value_from_body("reviewers-list").split(",").map(&:strip)-[no_reviewer_text]
     end
 
-    def no_reviewer_text
-      params[:no_reviewer_text] || 'TBD'
+    def list_of_due_dates
+      @list_of_due_dates ||= read_value_from_body("due-dates-list").strip.split("\n").map(&:strip)
+    end
+
+    def add_reviewer_due_date(reviewer)
+      list = list_of_due_dates
+      list << "Due date for #{reviewer}: #{due_date}"
+    end
+
+    def remove_reviewer_due_date(reviewer)
+      list = list_of_due_dates
+      list.delete_if {|due_date| due_date.match?(/^Due date for #{reviewer}:/)}
+    end
+
+    def due_date
+      # Today + 21 days
+      (Time.now + due_date_in_days_from_now * 86400).strftime("%Y-%m-%d")
+    end
+
+    def due_date_in_days_from_now
+      params[:due_date_days] || 21
     end
 
     def add_as_collaborator?(value)
@@ -71,6 +92,10 @@ module Ropensci
 
     def add_as_assignee?(value)
       username?(value) && params[:add_as_assignee] == true
+    end
+
+    def no_reviewer_text
+      params[:no_reviewer_text] || 'TBD'
     end
 
     def description
