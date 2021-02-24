@@ -29,7 +29,6 @@ buffy:
             - 2/seeking-reviewer(s)
           only:
             - editors
-            - maelle
       - approved:
           command: approve
           description: Approve the package
@@ -43,11 +42,9 @@ buffy:
             - 6/approved
           only:
             - editors
-            - maelle
     ropensci_reviewers:
       only:
         - editors
-        - maelle
       if:
         role_assigned: editor
       no_reviewer_text: "TBD"
@@ -59,24 +56,20 @@ buffy:
       message: "The editor guide can be found at https://devguide.ropensci.org/editorguide.html#editorchecklist"
       only:
         - editors
-        - maelle
       add_labels:
         - 1/editor-checks
     remove_editor:
       only:
         - editors
-        - maelle
       no_editor_text: "TBD"
     close_issue_command:
       - when_approving:
           only:
             - editors
-            - maelle
           command: approve
       - out_of_scope:
           only:
             - editors
-            - maelle
           command: out of scope
           add_labels:
             - out-of-scope
