@@ -52,12 +52,12 @@ describe Ropensci::ReviewersDueDateResponder do
         due_date = (Time.now + 10 * 86400).strftime("%Y-%m-%d")
         expect(due_date.strip).to_not be_empty
         expect(due_date).to_not eq(@new_due_date)
-        expect(@responder).to receive(:respond).with("@xuanxu added to the reviewers list. Review due date is #{due_date}")
+        expect(@responder).to receive(:respond).with("@xuanxu added to the reviewers list. Review due date is #{due_date}. Thanks @xuanxu for accepting to review! Please refer to [our reviewer guide](https://devguide.ropensci.org/reviewerguide.html).")
         @responder.process_message(@msg)
       end
 
       it "should respond to github" do
-        expect(@responder).to receive(:respond).with("@xuanxu added to the reviewers list. Review due date is #{@new_due_date}")
+        expect(@responder).to receive(:respond).with("@xuanxu added to the reviewers list. Review due date is #{@new_due_date}. Thanks @xuanxu for accepting to review! Please refer to [our reviewer guide](https://devguide.ropensci.org/reviewerguide.html)")
         @responder.process_message(@msg)
       end
 
