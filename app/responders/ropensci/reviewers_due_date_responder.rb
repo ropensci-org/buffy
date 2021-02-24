@@ -38,7 +38,7 @@ module Ropensci
         new_list = (list_of_reviewers + [reviewer]).uniq
         update_list("reviewers", new_list.join(", "))
         update_list("due-dates", add_reviewer_due_date(reviewer).join("\n"))
-        respond("#{reviewer} added to the reviewers list. Review due date is #{due_date}")
+        respond("#{reviewer} added to the reviewers list. Review due date is #{due_date}. Thanks #{reviewer} for accepting to review! Please refer to [our reviewer guide](https://devguide.ropensci.org/reviewerguide.html).")
         add_collaborator(reviewer) if add_as_collaborator?(reviewer)
         add_assignee(reviewer) if add_as_assignee?(reviewer)
         process_labeling if new_list.size == 2
