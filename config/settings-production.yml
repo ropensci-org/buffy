@@ -74,4 +74,13 @@ buffy:
             - out-of-scope
           remove_labels:
             - 1/editor-checks
+    external_service:
+      name: gp
+      command: run goodpractice
+      description: Various package checks
+      url: "http://kirby.ecohealthalliance.org:22051/gp"
+      method: post
+      query_params:
+          url: https://github.com/ropensci/riem
+      template_file: goodpractice.md
 
