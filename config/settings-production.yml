@@ -82,6 +82,6 @@ buffy:
       url: "http://kirby.ecohealthalliance.org:22051/gp"
       method: post
       query_params:
-          url: https://github.com/ropensci/riem
+          u: https://github.com/ropensci/riem
       template_file: goodpractice.md
 
