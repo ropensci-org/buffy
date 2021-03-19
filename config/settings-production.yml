@@ -81,7 +81,9 @@ buffy:
       message: Thanks, about to send the query.
       url: "http://kirby.ecohealthalliance.org:22051/gp"
       method: post
-      query_params:
-          u: https://github.com/ropensci/riem
+      data_from_issue:
+        - repourl
+      mapping:
+        u: repourl
       template_file: goodpractice.md
 
