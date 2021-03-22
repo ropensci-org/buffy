@@ -81,7 +81,7 @@ buffy:
       command: run goodpractice
       description: Various package checks
       message: Thanks, about to send the query.
-      url: "http://kirby.ecohealthalliance.org:22051/gp"
+      url: http://kirby.ecohealthalliance.org:22051/gp
       method: post
       data_from_issue:
         - repourl
