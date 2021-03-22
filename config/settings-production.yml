@@ -57,6 +57,8 @@ buffy:
         - editors
       add_labels:
         - 1/editor-checks
+      remove_labels:
+        - 0/editorial-team-prep
     remove_editor:
       only:
         - editors
