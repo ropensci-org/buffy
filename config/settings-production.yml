@@ -78,6 +78,8 @@ buffy:
             - 1/editor-checks
     external_service:
       name: gp
+      only:
+        - editors
       command: run goodpractice
       description: Various package checks
       message: Thanks, about to send the query.
