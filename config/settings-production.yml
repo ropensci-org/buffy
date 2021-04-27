@@ -77,13 +77,13 @@ buffy:
           remove_labels:
             - 1/editor-checks
     external_service:
-      name: gp
+      name: editorcheck
       only:
         - editors
-      command: run goodpractice
+      command: check package
       description: Various package checks
       message: Thanks, about to send the query.
-      url: http://kirby.ecohealthalliance.org:22051/gp
+      url: http://kirby.ecohealthalliance.org:22051/editorcheck
       method: post
       data_from_issue:
         - repourl
