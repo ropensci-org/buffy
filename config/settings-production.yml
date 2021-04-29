@@ -90,4 +90,18 @@ buffy:
       mapping:
         u: repourl
       template_file: goodpractice.md
+    external_service:
+      name: goodtoreview
+      only:
+        - software-review-testing
+      command: goodtoreview
+      description: Check whether a package is good to send out to review
+      message: Thanks, about to check whether the package is review-ready
+      url: http://kirby.ecohealthalliance.org:22051/goodtoreview
+      method: post
+      data_from_issue:
+        - repourl
+      mapping:
+        u: repourl
+      template_file: goodpractice.md
 
