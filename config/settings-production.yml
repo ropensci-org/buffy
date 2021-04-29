@@ -103,3 +103,4 @@ buffy:
         - repourl
       mapping:
         u: repourl
+      template_file: goodpractice.md
