@@ -11,7 +11,7 @@ class AssignEditorResponder < Responder
 
   def process_message(message)
     if:
-      title: "^Submit software"
+      title: "^Submit software|^Enviar software"
     mark = "<!--editor-->"
     end_mark = "<!--end-editor-->"
 
