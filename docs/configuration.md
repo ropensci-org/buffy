@@ -144,19 +144,35 @@ The _env_ section is used to declare general key/value settings. For security re
 ```eval_rst
 :title: *<String>* or *<Regular Expresion>* Responder will run only if issue' title matches this.
 :body: *<String>* or *<Regular Expresion>* Responder will run only if the body of the issue matches this.
-:value: *<String>* Responder will run only if there is a value for this in the issue (marked with HTML comments).
+:value_exists: *<String>* Responder will run only if there is a not empty value for this in the issue (marked with HTML comments).
+:value_matches: *<Hash>* Responder will run only if the param values (marked with HTML comments) in the body of the issue matches the ones specified here.
 :role_assigned: *<String>* Responder will be run only if there is a username assigned for the specified value.
+:reject_msg: *<String>* Optional. The response to send as comment if the conditions are not met
 ```
 
   Example:
 
   ```yaml
+    # This responder should be invoked only if there's an editor assigned
+    # otherwise will reply with a custom "no editor assigned yet" message
     assign_reviewer:
       if:
         role_assigned: editor
+        reject_msg: I can not do that because there is no editor assigned yet
+
+    # This responder will run only if issue title includes '[PRE-REVIEW]' and if
+    # there is a value for repo-url, ie: <!--repo-url-->whatever<!--end-repo-url-->
     start_review:
       if:
         title: "^\\[PRE-REVIEW\\]"
+        value_exists: repo-url
+
+    # This responder will run only if the value for submission_type in the body of
+    # the issue matches 'astro', ie: <!--submission_type-->astro<!--end-submission_type-->
+    start_review:
+      if:
+        value_matches:
+          submission_type: astro
   ```
   </dd>
 

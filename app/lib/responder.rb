@@ -77,27 +77,40 @@ class Responder
     return true if params[:if].nil? || params[:if].empty?
     title_condition = params[:if][:title].nil? ? "" : params[:if][:title]
     body_condition = params[:if][:body].nil? ? "" : params[:if][:body]
-    value_condition = params[:if][:value].nil? ? "" : params[:if][:value]
+    value_condition = params[:if][:value_exists].nil? ? "" : params[:if][:value_exists]
     role_assigned_condition = params[:if][:role_assigned].nil? ? "" : params[:if][:role_assigned]
+    value_matches_condition = params[:if][:value_matches].nil? ? {} : params[:if][:value_matches]
+    rejection_response = params[:if][:reject_msg].nil? ? "" : params[:if][:reject_msg]
 
     unless title_condition.empty? || Regexp.new(title_condition).match?(@context.issue_title)
-      respond("I can't do that in this kind of issue")
+      respond(rejection_response) unless rejection_response.empty?
       return false
     end
 
     unless body_condition.empty? || Regexp.new(body_condition).match?(@context.issue_body)
-      respond("I can't do that. Data in the body of the issue is incorrect")
+      respond(rejection_response) unless rejection_response.empty?
       return false
     end
 
     unless value_condition.empty? || !read_value_from_body(value_condition).empty?
-      respond("That can't be done if there is no #{value_condition}")
+      respond(rejection_response) unless rejection_response.empty?
       return false
     end
 
     unless role_assigned_condition.empty? || username?(read_value_from_body(role_assigned_condition))
-      respond("That can't be done if there is no #{role_assigned_condition} assigned")
+      respond(rejection_response) unless rejection_response.empty?
       return false
+    end
+
+    if value_matches_condition.is_a?(Hash)
+      value_matches_condition.each_pair do |k, v|
+        unless Regexp.new(v.to_s.strip).match?(read_value_from_body(k))
+          respond(rejection_response) unless rejection_response.empty?
+          return false
+        end
+      end
+    else
+      raise "Configuration Error in #{self.class.name}: value_matches should be a hash of [field_name:expected_value] pairs"
     end
 
     return true
