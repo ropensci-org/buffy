@@ -52,12 +52,32 @@ describe Ropensci::ReviewersDueDateResponder do
         due_date = (Time.now + 10 * 86400).strftime("%Y-%m-%d")
         expect(due_date.strip).to_not be_empty
         expect(due_date).to_not eq(@new_due_date)
-        expect(@responder).to receive(:respond).with("@xuanxu added to the reviewers list. Review due date is #{due_date}. Thanks @xuanxu for accepting to review! Please refer to [our reviewer guide](https://devguide.ropensci.org/reviewerguide.html).")
+        expect(@responder).to receive(:respond).with("@xuanxu added to the reviewers list. Review due date is #{due_date}. Thanks @xuanxu for accepting to review! ")
         @responder.process_message(@msg)
       end
 
       it "should respond to github" do
+        expect(@responder).to receive(:respond).with("@xuanxu added to the reviewers list. Review due date is #{@new_due_date}. Thanks @xuanxu for accepting to review! ")
+        @responder.process_message(@msg)
+      end
+
+      it "should respond with a link to reviewers guide when standard submission-type" do
+        issue_body = "...Reviewers: <!--reviewers-list-->@maelle<!--end-reviewers-list-->" +
+                     "<!--due-dates-list-->Due date for @maelle: 2121-12-31<!--end-due-dates-list--> ..." +
+                     "<!--submission-type-->Standard<!--end-submission-type-->"
+        allow(@responder).to receive(:issue_body).and_return(issue_body)
+
         expect(@responder).to receive(:respond).with("@xuanxu added to the reviewers list. Review due date is #{@new_due_date}. Thanks @xuanxu for accepting to review! Please refer to [our reviewer guide](https://devguide.ropensci.org/reviewerguide.html).")
+        @responder.process_message(@msg)
+      end
+
+      it "should respond with a link to statistical software reviewers guide when stats submission-type" do
+        issue_body = "...Reviewers: <!--reviewers-list-->@maelle<!--end-reviewers-list-->" +
+                     "<!--due-dates-list-->Due date for @maelle: 2121-12-31<!--end-due-dates-list--> ..." +
+                     "<!--submission-type-->Stats<!--end-submission-type-->"
+        allow(@responder).to receive(:issue_body).and_return(issue_body)
+
+        expect(@responder).to receive(:respond).with("@xuanxu added to the reviewers list. Review due date is #{@new_due_date}. Thanks @xuanxu for accepting to review! Please refer to [our reviewer guide](https://ropenscilabs.github.io/statistical-software-review-book/pkgreview.html).")
         @responder.process_message(@msg)
       end
 
@@ -244,6 +264,28 @@ describe Ropensci::ReviewersDueDateResponder do
       expect(@responder.username?("@username")).to be_truthy
       @responder.params[:add_as_assignee] = true
       expect(@responder.add_as_assignee?("@username")).to be_truthy
+    end
+  end
+
+  describe "#guide_link_by_submission_type" do
+    it "returns link to ropensci reviewers guide if submission type is Standard" do
+      allow(@responder).to receive(:read_value_from_body).with("submission-type").and_return("Standard")
+      expect(@responder.guide_link_by_submission_type).to eq("Please refer to [our reviewer guide](https://devguide.ropensci.org/reviewerguide.html).")
+    end
+
+    it "returns link to statistical software reviewers guide if submission type is Stats" do
+      allow(@responder).to receive(:read_value_from_body).with("submission-type").and_return("Stats")
+      expect(@responder.guide_link_by_submission_type).to eq("Please refer to [our reviewer guide](https://ropenscilabs.github.io/statistical-software-review-book/pkgreview.html).")
+    end
+
+    it "is empty for unrecognized submission types" do
+      allow(@responder).to receive(:read_value_from_body).with("submission-type").and_return("Whatever")
+      expect(@responder.guide_link_by_submission_type).to eq("")
+    end
+
+    it "is empty if no submission type" do
+      allow(@responder).to receive(:read_value_from_body).with("submission-type").and_return("")
+      expect(@responder.guide_link_by_submission_type).to eq("")
     end
   end
 

@@ -38,7 +38,7 @@ module Ropensci
         new_list = (list_of_reviewers + [reviewer]).uniq
         update_list("reviewers", new_list.join(", "))
         update_list("due-dates", add_reviewer_due_date(reviewer).join("\n"))
-        respond("#{reviewer} added to the reviewers list. Review due date is #{due_date}. Thanks #{reviewer} for accepting to review! Please refer to [our reviewer guide](https://devguide.ropensci.org/reviewerguide.html).")
+        respond("#{reviewer} added to the reviewers list. Review due date is #{due_date}. Thanks #{reviewer} for accepting to review! #{guide_link_by_submission_type}")
         add_collaborator(reviewer) if add_as_collaborator?(reviewer)
         add_assignee(reviewer) if add_as_assignee?(reviewer)
         process_labeling if new_list.size == 2
@@ -84,6 +84,18 @@ module Ropensci
 
     def due_date_in_days_from_now
       params[:due_date_days] || 21
+    end
+
+    def guide_link_by_submission_type
+      submission_type = read_value_from_body("submission-type").downcase
+      case submission_type
+      when "standard"
+        "Please refer to [our reviewer guide](https://devguide.ropensci.org/reviewerguide.html)."
+      when "stats"
+        "Please refer to [our reviewer guide](https://ropenscilabs.github.io/statistical-software-review-book/pkgreview.html)."
+      else
+        ""
+      end
     end
 
     def add_as_collaborator?(value)
