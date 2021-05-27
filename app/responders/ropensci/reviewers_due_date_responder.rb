@@ -12,7 +12,7 @@ module Ropensci
 
     def process_message(message)
       add_or_remove = @match_data[1].downcase
-      reviewer = @match_data[2]
+      @reviewer = @match_data[2]
       to_or_from = @match_data[3].downcase
 
       if !issue_body_has?("reviewers-list")
@@ -23,33 +23,33 @@ module Ropensci
       add_to_or_remove_from = [add_or_remove, to_or_from].join(" ")
 
       if ["add to reviewers", "add as reviewer"].include?(add_to_or_remove_from)
-        add reviewer
+        add_reviewer
       elsif add_to_or_remove_from == "remove from reviewers"
-        remove reviewer
+        remove_reviewer
       else
         respond("That command is confusing. Did you mean to ADD TO reviewers or to REMOVE FROM reviewers?")
       end
     end
 
-    def add(reviewer)
+    def add_reviewer
       if list_of_reviewers.include?(reviewer)
         respond("#{reviewer} is already included in the reviewers list")
       else
         new_list = (list_of_reviewers + [reviewer]).uniq
         update_list("reviewers", new_list.join(", "))
-        update_list("due-dates", add_reviewer_due_date(reviewer).join("\n"))
-        respond("#{reviewer} added to the reviewers list. Review due date is #{due_date}. Thanks #{reviewer} for accepting to review! #{guide_link_by_submission_type}")
+        update_list("due-dates", add_reviewer_due_date.join("\n"))
+        respond_by_submission_type
         add_collaborator(reviewer) if add_as_collaborator?(reviewer)
         add_assignee(reviewer) if add_as_assignee?(reviewer)
         process_labeling if new_list.size == 2
       end
     end
 
-    def remove(reviewer)
+    def remove_reviewer
       if list_of_reviewers.include?(reviewer)
         new_list = (list_of_reviewers - [reviewer]).uniq
         updated_list = new_list.empty? ? no_reviewer_text : new_list.join(", ")
-        update_list("due-dates", remove_reviewer_due_date(reviewer).join("\n"))
+        update_list("due-dates", remove_reviewer_due_date.join("\n"))
         update_list("reviewers", updated_list)
         respond("#{reviewer} removed from the reviewers list!")
         remove_assignee(reviewer) if add_as_assignee?(reviewer)
@@ -57,6 +57,10 @@ module Ropensci
       else
         respond("#{reviewer} is not in the reviewers list")
       end
+    end
+
+    def reviewer
+      @reviewer
     end
 
     def list_of_reviewers
@@ -67,12 +71,12 @@ module Ropensci
       @list_of_due_dates ||= read_value_from_body("due-dates-list").strip.split("\n").map(&:strip)
     end
 
-    def add_reviewer_due_date(reviewer)
+    def add_reviewer_due_date
       list = list_of_due_dates
       list << "Due date for #{reviewer}: #{due_date}"
     end
 
-    def remove_reviewer_due_date(reviewer)
+    def remove_reviewer_due_date
       list = list_of_due_dates
       list.delete_if {|due_date| due_date.match?(/^Due date for #{reviewer}:/)}
     end
@@ -86,16 +90,16 @@ module Ropensci
       params[:due_date_days] || 21
     end
 
-    def guide_link_by_submission_type
+    def respond_by_submission_type
+      generic_en = "#{reviewer} added to the reviewers list. Review due date is #{due_date}. Thanks #{reviewer} for accepting to review!"
+      replies = {
+        "standard" =>  "#{generic_en} Please refer to [our reviewer guide](https://devguide.ropensci.org/reviewerguide.html).",
+        "stats" => "#{generic_en} Please refer to [our reviewer guide](https://ropenscilabs.github.io/statistical-software-review-book/pkgreview.html).",
+        "estándar" => "#{generic_en} Please refer to [our reviewer guide](https://devguide.ropensci.org/reviewerguide.html).",
+      }
+
       submission_type = read_value_from_body("submission-type").downcase
-      case submission_type
-      when "standard"
-        "Please refer to [our reviewer guide](https://devguide.ropensci.org/reviewerguide.html)."
-      when "stats"
-        "Please refer to [our reviewer guide](https://ropenscilabs.github.io/statistical-software-review-book/pkgreview.html)."
-      else
-        ""
-      end
+      respond(replies[submission_type] || generic_en)
     end
 
     def add_as_collaborator?(value)
