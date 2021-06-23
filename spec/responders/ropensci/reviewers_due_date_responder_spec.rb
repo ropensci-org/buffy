@@ -8,7 +8,7 @@ describe Ropensci::ReviewersDueDateResponder do
 
   before do
     settings = { env: {bot_github_user: "ropensci-review-bot"} }
-    params = { airtable_token: "1234567890" }
+    params = { airtable_token: "1234567890", no_reviewer_text: "TBD" }
     @responder = subject.new(settings, params)
   end
 
@@ -67,6 +67,10 @@ describe Ropensci::ReviewersDueDateResponder do
       it "should respond to github" do
         expect(@responder).to receive(:respond).with("@xuanxu added to the reviewers list. Review due date is #{@new_due_date}. Thanks @xuanxu for accepting to review!")
         @responder.process_message(@msg)
+      end
+
+      it "should add an AirtableWorker to the jobs queue" do
+        expect { @responder.process_message('') }.to change(Ropensci::AirtableWorker.jobs, :size).by(1)
       end
 
       it "should respond with a link to reviewers guide when standard submission-type" do
@@ -244,6 +248,52 @@ describe Ropensci::ReviewersDueDateResponder do
           @responder.process_message(@msg)
         end
       end
+    end
+  end
+
+  describe "#update_airtable" do
+    before do
+      disable_github_calls_for(@responder)
+      @responder.context = OpenStruct.new(issue_id: 33,
+                                          issue_title: "Bioinfo package",
+                                          issue_author: "@uthor",
+                                          repo: "openjournals/testing",
+                                          sender: "xuanxu")
+      allow(@responder).to receive(:reviewer).and_return("@reviewer_21")
+      @expected_params = { airtable_token: "1234567890", no_reviewer_text: "TBD" }
+      @expected_locals = { bot_name: "ropensci-review-bot",
+                           issue_id: 33,
+                           repo: "openjournals/testing",
+                           sender: "xuanxu",
+                           issue_author: "@uthor"}
+    end
+
+    it "should pass title to the AirtableWorker when there is no package-name" do
+      expected_custom_params = { reviewer: "@reviewer_21", package_name: "Bioinfo package" }
+
+      issue_body = "...Package: <!--package-name--><!--end-package-name--> ..."
+      allow(@responder).to receive(:issue_body).and_return(issue_body)
+
+      expect(Ropensci::AirtableWorker).to receive(:perform_async).with(:assign_reviewer,
+                                                                       @expected_params,
+                                                                       @expected_locals,
+                                                                       expected_custom_params)
+
+      @responder.update_airtable
+    end
+
+    it "should pass package-name to the AirtableWorker" do
+      expected_custom_params = { reviewer: "@reviewer_21", package_name: "Superpackage!" }
+
+      issue_body = "...Package: <!--package-name-->Superpackage!<!--end-package-name--> ..."
+      allow(@responder).to receive(:issue_body).and_return(issue_body)
+
+      expect(Ropensci::AirtableWorker).to receive(:perform_async).with(:assign_reviewer,
+                                                                       @expected_params,
+                                                                       @expected_locals,
+                                                                       expected_custom_params)
+
+      @responder.update_airtable
     end
   end
 
