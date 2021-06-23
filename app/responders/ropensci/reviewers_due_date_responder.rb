@@ -24,6 +24,12 @@ module Ropensci
 
       if ["add to reviewers", "add as reviewer"].include?(add_to_or_remove_from)
         add_reviewer
+        package_name = read_value_from_body('package_name')
+        package_name = context.issue_title if package_name.empty?
+        Ropensci::AirtableWorker.perform_async(:assign_reviewer,
+                                               params,
+                                               locals,
+                                               { reviewer: reviewer, package_name: package_name })
       elsif add_to_or_remove_from == "remove from reviewers"
         remove_reviewer
       else

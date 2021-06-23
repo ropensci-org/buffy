@@ -6,7 +6,11 @@ describe Ropensci::ReviewersDueDateResponder do
     described_class
   end
 
-  before { @responder = subject.new({env: {bot_github_user: "ropensci-review-bot"}}, {}) }
+  before do
+    settings = { env: {bot_github_user: "ropensci-review-bot"} }
+    params = { airtable_token: "1234567890" }
+    @responder = subject.new(settings, params)
+  end
 
   describe "listening" do
     it "should listen to new comments" do
@@ -26,6 +30,10 @@ describe Ropensci::ReviewersDueDateResponder do
   describe "#process_message" do
     before do
       disable_github_calls_for(@responder)
+      @responder.context = OpenStruct.new(issue_id: 32,
+                                          issue_author: "opener",
+                                          repo: "openjournals/testing",
+                                          sender: "xuanxu")
     end
 
     describe "adding user as reviewer" do
