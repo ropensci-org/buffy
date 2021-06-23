@@ -41,7 +41,7 @@ module Ropensci
                      package: @params["package_name"])
 
       #Respond to GH with:
-      respond("If you haven't done so, please fill [this form]() for us to update our reviewers records.")
+      respond("@#{gh_user.login}: If you haven't done so, please fill [this form](https://airtable.com/shrnfDI2S9uuyxtDw) for us to update our reviewers records.")
     end
   end
 end
