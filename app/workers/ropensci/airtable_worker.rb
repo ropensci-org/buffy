@@ -28,7 +28,7 @@ module Ropensci
 
       # Check if reviewer present in Airtable reviewers-prod or create it
       airtable_reviewer = airtable_revs.all(filter: "{github} = '#{gh_user.login}'").first ||
-                          airtable_revs.create(name: gh_user.name, email: gh_user.email)
+                          airtable_revs.create(github: gh_user.login, name: gh_user.name, email: gh_user.email)
 
       # Add current_assignment to reviewers
       airtable_reviewer["current_assignment"] = "https://github.com/#{context.repo}/#{context.issue_id}"
