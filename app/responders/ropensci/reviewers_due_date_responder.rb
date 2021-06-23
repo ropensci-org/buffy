@@ -61,7 +61,7 @@ module Ropensci
     end
 
     def update_airtable
-      package_name = read_value_from_body('package_name')
+      package_name = read_value_from_body('package-name')
       package_name = context.issue_title if package_name.empty?
       Ropensci::AirtableWorker.perform_async(:assign_reviewer,
                                              params,
