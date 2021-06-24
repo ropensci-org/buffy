@@ -1,7 +1,7 @@
 ROpenSci :: Reviewers & due date
 ================================
 
-This responder can be used to add/remove a user to/from the reviewers list in the body of the issue. It also sets a due date for the review and updates that info in the body of the issue and in the reply comment.
+This responder can be used to add/remove a user to/from the reviewers list in the body of the issue. It also sets a due date for the review and updates that info in the body of the issue and in the reply comment. This responder will also update Airtable adding entries to the reviewers and reviews tables.
 Allows [labeling](../../labeling), that will take effect when the second reviewer is assigned.
 
 ## Listens to
@@ -37,6 +37,15 @@ The body of the issue should have the a couple of placeholders marked with HTML 
 :add_as_assignee: *<Boolean>* Optional. If true, the new reviewer will be added as assignee to the issue. Default value is **false**.
 
 :add_as_collaborator: *<Boolean>* Optional. If true, the new reviewer it will be added as collaborator to the repo. Default value is **false**.
+```
+
+For the **Airtable** connection to work two parameters must be present in the `env` section of the settings file, configured using environment variable:
+```yaml
+...
+  env:
+    airtable_api_key: <%= ENV['AIRTABLE_API_KEY'] %>
+    airtable_base_id: <%= ENV['AIRTABLE_BASE_ID'] %>
+...
 ```
 
 ## Examples
