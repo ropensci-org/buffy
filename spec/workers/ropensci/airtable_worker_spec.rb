@@ -108,7 +108,7 @@ describe Ropensci::AirtableWorker do
     before do
       @worker = described_class.new
       @worker.context = OpenStruct.new({repo: "testing/new_package", issue_id: "33"})
-      @worker.params = OpenStruct.new({ reviewer: "@reviewer21", package_name: "TestPackage"})
+      @worker.params = OpenStruct.new({ reviewer: "@reviewer21"})
       @worker.airtable_config = {api_key: "ABC", base_id: "123"}
       disable_github_calls_for(@worker)
     end
@@ -149,6 +149,83 @@ describe Ropensci::AirtableWorker do
         expect(review_entry).to_not receive(:destroy)
 
         @worker.remove_reviewer
+      end
+    end
+  end
+
+  describe "#slack_invites" do
+    before do
+      @worker = described_class.new
+      @worker.context = OpenStruct.new({repo: "testing/new_package", issue_id: "33"})
+      @worker.airtable_config = {api_key: "ABC", base_id: "123"}
+      disable_github_calls_for(@worker)
+    end
+
+    describe "updates slack_invites Airtable" do
+      let(:slack_invites_table) { double(create: true) }
+      let(:expected_params) { {package: "TestPackage", date: Date.today.strftime("%d/%m/%Y")} }
+      let(:reviewer1) { OpenStruct.new(login: "rev1", name: "Reviewer One", email: "one@reviewe.rs") }
+      let(:reviewer2) { OpenStruct.new(login: "rev2", name: "Reviewer Two", email: "two@reviewe.rs") }
+      let(:author1) { OpenStruct.new(login: "author1", name: "Author One", email: "one@autho.rs") }
+      let(:author2) { OpenStruct.new(login: "other1", name: "Author Two", email: "two@autho.rs") }
+      let(:author3) { OpenStruct.new(login: "other2", name: "Author Three", email: "three@autho.rs") }
+
+      before do
+        expect(Airrecord).to receive(:table).once.with("ABC", "123", "slack_invites").and_return(slack_invites_table)
+        allow(Octokit).to receive(:user).with(nil).and_raise(Octokit::NotFound)
+        allow(Octokit).to receive(:user).with("rev1").and_return(reviewer1)
+        allow(Octokit).to receive(:user).with("rev2").and_return(reviewer2)
+        allow(Octokit).to receive(:user).with("author1").and_return(author1)
+        allow(Octokit).to receive(:user).with("other1").and_return(author2)
+        allow(Octokit).to receive(:user).with("other2").and_return(author3)
+      end
+
+      it "should create an entry for the author" do
+        @worker.params = OpenStruct.new({author: "author1", reviewers: [], author_others: [], package_name: "TestPackage"})
+        expected_params_author_1 = expected_params.merge({ name: "Author One", email: "one@autho.rs", role: "author1" })
+        expect(slack_invites_table).to receive(:create).with(expected_params_author_1)
+        @worker.slack_invites
+      end
+
+      it "should create an entry for each reviewer" do
+        @worker.params = OpenStruct.new({author: nil, reviewers: ["rev1", "rev2"], author_others: [], package_name: "TestPackage"})
+        expected_params_reviewer_1 = expected_params.merge({ name: "Reviewer One", email: "one@reviewe.rs", role: "reviewer" })
+        expected_params_reviewer_2 = expected_params.merge({ name: "Reviewer Two", email: "two@reviewe.rs", role: "reviewer" })
+        expect(slack_invites_table).to receive(:create).with(expected_params_reviewer_1)
+        expect(slack_invites_table).to receive(:create).with(expected_params_reviewer_2)
+        @worker.slack_invites
+      end
+
+      it "should create an entry for each other author" do
+        @worker.params = OpenStruct.new({author: nil, reviewers: [], author_others: ["other1", "other2"], package_name: "TestPackage"})
+        expected_params_author_2 = expected_params.merge({ name: "Author Two", email: "two@autho.rs", role: "author-others" })
+        expected_params_author_3 = expected_params.merge({ name: "Author Three", email: "three@autho.rs", role: "author-others" })
+        expect(slack_invites_table).to receive(:create).with(expected_params_author_2)
+        expect(slack_invites_table).to receive(:create).with(expected_params_author_3)
+        @worker.slack_invites
+      end
+
+      it "should create entries for all authors and reviewers" do
+        @worker.params = OpenStruct.new({author: "author1", reviewers: ["rev1", "rev2"], author_others: ["other1", "other2"], package_name: "TestPackage"})
+        expected_params_author_1 = expected_params.merge({ name: "Author One", email: "one@autho.rs", role: "author1" })
+        expected_params_reviewer_1 = expected_params.merge({ name: "Reviewer One", email: "one@reviewe.rs", role: "reviewer" })
+        expected_params_reviewer_2 = expected_params.merge({ name: "Reviewer Two", email: "two@reviewe.rs", role: "reviewer" })
+        expected_params_author_2 = expected_params.merge({ name: "Author Two", email: "two@autho.rs", role: "author-others" })
+        expected_params_author_3 = expected_params.merge({ name: "Author Three", email: "three@autho.rs", role: "author-others" })
+        expect(slack_invites_table).to receive(:create).with(expected_params_author_1)
+        expect(slack_invites_table).to receive(:create).with(expected_params_reviewer_1)
+        expect(slack_invites_table).to receive(:create).with(expected_params_reviewer_2)
+        expect(slack_invites_table).to receive(:create).with(expected_params_author_2)
+        expect(slack_invites_table).to receive(:create).with(expected_params_author_3)
+        @worker.slack_invites
+      end
+
+      it "should should use login if name is not defined" do
+        author1.name = nil
+        @worker.params = OpenStruct.new({author: "author1", reviewers: [], author_others: [], package_name: "TestPackage"})
+        expected_params_author_1 = expected_params.merge({ name: "author1 (GitHub username)", email: "one@autho.rs", role: "author1" })
+        expect(slack_invites_table).to receive(:create).with(expected_params_author_1)
+        @worker.slack_invites
       end
     end
   end

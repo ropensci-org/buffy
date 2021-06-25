@@ -15,6 +15,8 @@ module Ropensci
         assign_reviewer
       when :remove_reviewer
         remove_reviewer
+      when :slack_invites
+        slack_invites
       end
     end
 
@@ -63,6 +65,56 @@ module Ropensci
       end
     end
 
+    def slack_invites
+      author = begin
+        Octokit.user(params.author)
+      rescue Octokit::NotFound
+        nil
+      end
+
+      reviewers = []
+      params.reviewers.each do |reviewer|
+        reviewers << begin
+          Octokit.user(reviewer)
+        rescue Octokit::NotFound
+          nil
+        end
+      end
+
+      author_others = []
+      params.author_others.each do |other|
+        author_others << begin
+          Octokit.user(other)
+        rescue Octokit::NotFound
+          nil
+        end
+      end
+
+      if author
+        airtable_slack_invites.create(package: params.package_name,
+                                      name: name_or_github_login(author),
+                                      email: author.email,
+                                      date: Time.now.strftime("%d/%m/%Y"),
+                                      role: "author1")
+      end
+
+      reviewers.uniq.compact.each do |reviewer|
+        airtable_slack_invites.create(package: params.package_name,
+                                      name: name_or_github_login(reviewer),
+                                      email: reviewer.email,
+                                      date: Time.now.strftime("%d/%m/%Y"),
+                                      role: "reviewer")
+      end
+
+      author_others.uniq.compact.each do |other|
+        airtable_slack_invites.create(package: params.package_name,
+                                      name: name_or_github_login(other),
+                                      email: other.email,
+                                      date: Time.now.strftime("%d/%m/%Y"),
+                                      role: "author-others")
+      end
+    end
+
     private
 
     def airtable_revs
@@ -71,6 +123,18 @@ module Ropensci
 
     def airtable_reviews
       @airtable_reviews_table ||= Airrecord.table(airtable_config[:api_key], airtable_config[:base_id], "reviews")
+    end
+
+    def airtable_slack_invites
+      @airtable_slack_invites_table ||= Airrecord.table(airtable_config[:api_key], airtable_config[:base_id], "slack_invites")
+    end
+
+    def name_or_github_login(gh_user)
+      if gh_user.name.nil? || gh_user.name.empty?
+        return "#{gh_user.login} (GitHub username)"
+      else
+        return gh_user.name
+      end
     end
   end
 end
