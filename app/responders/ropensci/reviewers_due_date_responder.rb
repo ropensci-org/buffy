@@ -42,7 +42,7 @@ module Ropensci
         add_collaborator(reviewer) if add_as_collaborator?(reviewer)
         add_assignee(reviewer) if add_as_assignee?(reviewer)
         process_labeling if new_list.size == 2
-        update_airtable
+        airtable_add_reviewer
       end
     end
 
@@ -55,18 +55,23 @@ module Ropensci
         respond("#{reviewer} removed from the reviewers list!")
         remove_assignee(reviewer) if add_as_assignee?(reviewer)
         process_reverse_labeling if new_list.size == 1
+        airtable_remove_reviewer
       else
         respond("#{reviewer} is not in the reviewers list")
       end
     end
 
-    def update_airtable
+    def airtable_add_reviewer
       package_name = read_value_from_body('package-name')
       package_name = context.issue_title if package_name.empty?
       Ropensci::AirtableWorker.perform_async(:assign_reviewer,
                                              params,
                                              locals,
                                              { reviewer: reviewer, package_name: package_name })
+    end
+
+    def airtable_remove_reviewer
+      Ropensci::AirtableWorker.perform_async(:remove_reviewer, params, locals, { reviewer: reviewer })
     end
 
     def reviewer

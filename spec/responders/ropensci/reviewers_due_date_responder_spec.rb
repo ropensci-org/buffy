@@ -251,7 +251,7 @@ describe Ropensci::ReviewersDueDateResponder do
     end
   end
 
-  describe "#update_airtable" do
+  describe "#airtable_add_reviewer" do
     before do
       disable_github_calls_for(@responder)
       @responder.context = OpenStruct.new(issue_id: 33,
@@ -279,7 +279,7 @@ describe Ropensci::ReviewersDueDateResponder do
                                                                        @expected_locals,
                                                                        expected_custom_params)
 
-      @responder.update_airtable
+      @responder.airtable_add_reviewer
     end
 
     it "should pass package-name to the AirtableWorker" do
@@ -293,7 +293,35 @@ describe Ropensci::ReviewersDueDateResponder do
                                                                        @expected_locals,
                                                                        expected_custom_params)
 
-      @responder.update_airtable
+      @responder.airtable_add_reviewer
+    end
+  end
+
+  describe "#airtable_remove_reviewer" do
+    before do
+      disable_github_calls_for(@responder)
+      @responder.context = OpenStruct.new(issue_id: 33,
+                                          issue_title: "Bioinfo package",
+                                          issue_author: "@uthor",
+                                          repo: "openjournals/testing",
+                                          sender: "xuanxu")
+      allow(@responder).to receive(:reviewer).and_return("@reviewer_21")
+      @expected_params = { airtable_token: "1234567890", no_reviewer_text: "TBD" }
+      @expected_locals = { bot_name: "ropensci-review-bot",
+                           issue_id: 33,
+                           repo: "openjournals/testing",
+                           sender: "xuanxu",
+                           issue_author: "@uthor"}
+    end
+
+    it "should create an AirtableWorker job to remove reviewer" do
+      expected_custom_params = { reviewer: "@reviewer_21" }
+      expect(Ropensci::AirtableWorker).to receive(:perform_async).with(:remove_reviewer,
+                                                                       @expected_params,
+                                                                       @expected_locals,
+                                                                       expected_custom_params)
+
+      @responder.airtable_remove_reviewer
     end
   end
 
