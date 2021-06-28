@@ -161,7 +161,7 @@ describe Ropensci::AirtableWorker do
       disable_github_calls_for(@worker)
     end
 
-    describe "updates slack_invites Airtable" do
+    describe "updates slack-invites Airtable" do
       let(:slack_invites_table) { double(create: true) }
       let(:expected_params) { {package: "TestPackage", date: Date.today.strftime("%d/%m/%Y")} }
       let(:reviewer1) { OpenStruct.new(login: "rev1", name: "Reviewer One", email: "one@reviewe.rs") }
@@ -171,7 +171,7 @@ describe Ropensci::AirtableWorker do
       let(:author3) { OpenStruct.new(login: "other2", name: "Author Three", email: "three@autho.rs") }
 
       before do
-        expect(Airrecord).to receive(:table).once.with("ABC", "123", "slack_invites").and_return(slack_invites_table)
+        expect(Airrecord).to receive(:table).once.with("ABC", "123", "slack-invites").and_return(slack_invites_table)
         allow(Octokit).to receive(:user).with(nil).and_raise(Octokit::NotFound)
         allow(Octokit).to receive(:user).with("rev1").and_return(reviewer1)
         allow(Octokit).to receive(:user).with("rev2").and_return(reviewer2)

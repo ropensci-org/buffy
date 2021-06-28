@@ -126,7 +126,7 @@ module Ropensci
     end
 
     def airtable_slack_invites
-      @airtable_slack_invites_table ||= Airrecord.table(airtable_config[:api_key], airtable_config[:base_id], "slack_invites")
+      @airtable_slack_invites_table ||= Airrecord.table(airtable_config[:api_key], airtable_config[:base_id], "slack-invites")
     end
 
     def name_or_github_login(gh_user)
