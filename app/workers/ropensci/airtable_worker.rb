@@ -94,7 +94,7 @@ module Ropensci
         airtable_slack_invites.create(package: params.package_name,
                                       name: name_or_github_login(author),
                                       email: author.email,
-                                      date: Time.now.strftime("%d/%m/%Y"),
+                                      date: Time.now.strftime("%m/%d/%Y"),
                                       role: "author1")
       end
 
@@ -102,7 +102,7 @@ module Ropensci
         airtable_slack_invites.create(package: params.package_name,
                                       name: name_or_github_login(reviewer),
                                       email: reviewer.email,
-                                      date: Time.now.strftime("%d/%m/%Y"),
+                                      date: Time.now.strftime("%m/%d/%Y"),
                                       role: "reviewer")
       end
 
@@ -110,7 +110,7 @@ module Ropensci
         airtable_slack_invites.create(package: params.package_name,
                                       name: name_or_github_login(other),
                                       email: other.email,
-                                      date: Time.now.strftime("%d/%m/%Y"),
+                                      date: Time.now.strftime("%m/%d/%Y"),
                                       role: "author-others")
       end
     end

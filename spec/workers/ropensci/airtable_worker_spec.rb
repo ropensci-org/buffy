@@ -163,7 +163,7 @@ describe Ropensci::AirtableWorker do
 
     describe "updates slack-invites Airtable" do
       let(:slack_invites_table) { double(create: true) }
-      let(:expected_params) { {package: "TestPackage", date: Date.today.strftime("%d/%m/%Y")} }
+      let(:expected_params) { {package: "TestPackage", date: Date.today.strftime("%m/%d/%Y")} }
       let(:reviewer1) { OpenStruct.new(login: "rev1", name: "Reviewer One", email: "one@reviewe.rs") }
       let(:reviewer2) { OpenStruct.new(login: "rev2", name: "Reviewer Two", email: "two@reviewe.rs") }
       let(:author1) { OpenStruct.new(login: "author1", name: "Author One", email: "one@autho.rs") }
