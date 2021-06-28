@@ -59,7 +59,7 @@ module Ropensci
       end
 
       # Delete review entry
-      review_entry = airtable_reviews.all(filter: "{github} = '#{reviewer}' AND {id_no} = '#{context.issue_id}'").first
+      review_entry = airtable_reviews.all(filter: "AND({github} = '#{reviewer}', {id_no} = '#{context.issue_id}')").first
       if review_entry
         review_entry.destroy
       end
