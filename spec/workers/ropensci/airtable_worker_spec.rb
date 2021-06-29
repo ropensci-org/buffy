@@ -182,15 +182,24 @@ describe Ropensci::AirtableWorker do
 
       it "should create an entry for the author" do
         @worker.params = OpenStruct.new({author: "author1", reviewers: [], author_others: [], package_name: "TestPackage"})
-        expected_params_author_1 = expected_params.merge({ name: "Author One", email: "one@autho.rs", role: "author1" })
+        expected_params_author_1 = expected_params.merge({ name: "Author One",
+                                                           email: "one@autho.rs",
+                                                           github: "https://github.com/author1",
+                                                           role: "author1" })
         expect(slack_invites_table).to receive(:create).with(expected_params_author_1)
         @worker.slack_invites
       end
 
       it "should create an entry for each reviewer" do
         @worker.params = OpenStruct.new({author: nil, reviewers: ["rev1", "rev2"], author_others: [], package_name: "TestPackage"})
-        expected_params_reviewer_1 = expected_params.merge({ name: "Reviewer One", email: "one@reviewe.rs", role: "reviewer" })
-        expected_params_reviewer_2 = expected_params.merge({ name: "Reviewer Two", email: "two@reviewe.rs", role: "reviewer" })
+        expected_params_reviewer_1 = expected_params.merge({ name: "Reviewer One",
+                                                             email: "one@reviewe.rs",
+                                                             github: "https://github.com/rev1",
+                                                             role: "reviewer" })
+        expected_params_reviewer_2 = expected_params.merge({ name: "Reviewer Two",
+                                                             email: "two@reviewe.rs",
+                                                             github: "https://github.com/rev2",
+                                                             role: "reviewer" })
         expect(slack_invites_table).to receive(:create).with(expected_params_reviewer_1)
         expect(slack_invites_table).to receive(:create).with(expected_params_reviewer_2)
         @worker.slack_invites
@@ -198,8 +207,14 @@ describe Ropensci::AirtableWorker do
 
       it "should create an entry for each other author" do
         @worker.params = OpenStruct.new({author: nil, reviewers: [], author_others: ["other1", "other2"], package_name: "TestPackage"})
-        expected_params_author_2 = expected_params.merge({ name: "Author Two", email: "two@autho.rs", role: "author-others" })
-        expected_params_author_3 = expected_params.merge({ name: "Author Three", email: "three@autho.rs", role: "author-others" })
+        expected_params_author_2 = expected_params.merge({ name: "Author Two",
+                                                           email: "two@autho.rs",
+                                                             github: "https://github.com/other1",
+                                                           role: "author-others" })
+        expected_params_author_3 = expected_params.merge({ name: "Author Three",
+                                                           email: "three@autho.rs",
+                                                             github: "https://github.com/other2",
+                                                           role: "author-others" })
         expect(slack_invites_table).to receive(:create).with(expected_params_author_2)
         expect(slack_invites_table).to receive(:create).with(expected_params_author_3)
         @worker.slack_invites
@@ -207,11 +222,26 @@ describe Ropensci::AirtableWorker do
 
       it "should create entries for all authors and reviewers" do
         @worker.params = OpenStruct.new({author: "author1", reviewers: ["rev1", "rev2"], author_others: ["other1", "other2"], package_name: "TestPackage"})
-        expected_params_author_1 = expected_params.merge({ name: "Author One", email: "one@autho.rs", role: "author1" })
-        expected_params_reviewer_1 = expected_params.merge({ name: "Reviewer One", email: "one@reviewe.rs", role: "reviewer" })
-        expected_params_reviewer_2 = expected_params.merge({ name: "Reviewer Two", email: "two@reviewe.rs", role: "reviewer" })
-        expected_params_author_2 = expected_params.merge({ name: "Author Two", email: "two@autho.rs", role: "author-others" })
-        expected_params_author_3 = expected_params.merge({ name: "Author Three", email: "three@autho.rs", role: "author-others" })
+        expected_params_author_1 = expected_params.merge({ name: "Author One",
+                                                           email: "one@autho.rs",
+                                                           github: "https://github.com/author1",
+                                                           role: "author1" })
+        expected_params_reviewer_1 = expected_params.merge({ name: "Reviewer One",
+                                                             email: "one@reviewe.rs",
+                                                             github: "https://github.com/rev1",
+                                                             role: "reviewer" })
+        expected_params_reviewer_2 = expected_params.merge({ name: "Reviewer Two",
+                                                             email: "two@reviewe.rs",
+                                                             github: "https://github.com/rev2",
+                                                             role: "reviewer" })
+        expected_params_author_2 = expected_params.merge({ name: "Author Two",
+                                                           email: "two@autho.rs",
+                                                             github: "https://github.com/other1",
+                                                           role: "author-others" })
+        expected_params_author_3 = expected_params.merge({ name: "Author Three",
+                                                           email: "three@autho.rs",
+                                                             github: "https://github.com/other2",
+                                                           role: "author-others" })
         expect(slack_invites_table).to receive(:create).with(expected_params_author_1)
         expect(slack_invites_table).to receive(:create).with(expected_params_reviewer_1)
         expect(slack_invites_table).to receive(:create).with(expected_params_reviewer_2)
@@ -223,7 +253,10 @@ describe Ropensci::AirtableWorker do
       it "should should use login if name is not defined" do
         author1.name = nil
         @worker.params = OpenStruct.new({author: "author1", reviewers: [], author_others: [], package_name: "TestPackage"})
-        expected_params_author_1 = expected_params.merge({ name: "author1 (GitHub username)", email: "one@autho.rs", role: "author1" })
+        expected_params_author_1 = expected_params.merge({ name: "author1 (GitHub username)",
+                                                           email: "one@autho.rs",
+                                                           github: "https://github.com/author1",
+                                                           role: "author1" })
         expect(slack_invites_table).to receive(:create).with(expected_params_author_1)
         @worker.slack_invites
       end
