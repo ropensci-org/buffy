@@ -6,7 +6,11 @@ describe Ropensci::ReviewersDueDateResponder do
     described_class
   end
 
-  before { @responder = subject.new({env: {bot_github_user: "ropensci-review-bot"}}, {}) }
+  before do
+    settings = { env: {bot_github_user: "ropensci-review-bot"} }
+    params = { airtable_token: "1234567890", no_reviewer_text: "TBD" }
+    @responder = subject.new(settings, params)
+  end
 
   describe "listening" do
     it "should listen to new comments" do
@@ -26,6 +30,10 @@ describe Ropensci::ReviewersDueDateResponder do
   describe "#process_message" do
     before do
       disable_github_calls_for(@responder)
+      @responder.context = OpenStruct.new(issue_id: 32,
+                                          issue_author: "opener",
+                                          repo: "openjournals/testing",
+                                          sender: "xuanxu")
     end
 
     describe "adding user as reviewer" do
@@ -59,6 +67,11 @@ describe Ropensci::ReviewersDueDateResponder do
       it "should respond to github" do
         expect(@responder).to receive(:respond).with("@xuanxu added to the reviewers list. Review due date is #{@new_due_date}. Thanks @xuanxu for accepting to review!")
         @responder.process_message(@msg)
+      end
+
+      it "should add data to Airtable" do
+        expect(@responder).to receive(:airtable_add_reviewer)
+        @responder.process_message('')
       end
 
       it "should respond with a link to reviewers guide when standard submission-type" do
@@ -95,6 +108,7 @@ describe Ropensci::ReviewersDueDateResponder do
         msg = "@ropensci-review-bot add @maelle to reviewers"
         @responder.match_data = @responder.event_regex.match(msg)
         expect(@responder).to_not receive(:update_issue)
+        expect(@responder).to_not receive(:airtable_add_reviewer)
         expect(@responder).to receive(:respond).with("@maelle is already included in the reviewers list")
         @responder.process_message(msg)
       end
@@ -142,10 +156,16 @@ describe Ropensci::ReviewersDueDateResponder do
         @responder.process_message(@msg)
       end
 
+      it "should remove data from Airtable" do
+        expect(@responder).to receive(:airtable_remove_reviewer)
+        @responder.process_message('')
+      end
+
       it "should not remove reviewer if not present in the list" do
         msg = "@ropensci-review-bot remove @other_user from reviewers"
         @responder.match_data = @responder.event_regex.match(msg)
         expect(@responder).to_not receive(:update_issue)
+        expect(@responder).to_not receive(:airtable_remove_reviewer)
         expect(@responder).to receive(:respond).with("@other_user is not in the reviewers list")
         @responder.process_message(msg)
       end
@@ -236,6 +256,114 @@ describe Ropensci::ReviewersDueDateResponder do
           @responder.process_message(@msg)
         end
       end
+    end
+  end
+
+  describe "#airtable_add_reviewer" do
+    before do
+      disable_github_calls_for(@responder)
+      @responder.context = OpenStruct.new(issue_id: 33,
+                                          issue_title: "Bioinfo package",
+                                          issue_author: "@uthor",
+                                          repo: "openjournals/testing",
+                                          sender: "xuanxu")
+      allow(@responder).to receive(:reviewer).and_return("@reviewer_21")
+      @expected_params = { airtable_token: "1234567890", no_reviewer_text: "TBD" }
+      @expected_locals = { bot_name: "ropensci-review-bot",
+                           issue_id: 33,
+                           repo: "openjournals/testing",
+                           sender: "xuanxu",
+                           issue_author: "@uthor"}
+    end
+
+    it "should pass title to the AirtableWorker when there is no package-name" do
+      expected_custom_params = { reviewer: "@reviewer_21", package_name: "Bioinfo package" }
+
+      issue_body = "...Package: <!--package-name--><!--end-package-name--> ..."
+      allow(@responder).to receive(:issue_body).and_return(issue_body)
+
+      expect(Ropensci::AirtableWorker).to receive(:perform_async).with(:assign_reviewer,
+                                                                       @expected_params,
+                                                                       @expected_locals,
+                                                                       expected_custom_params)
+
+      @responder.airtable_add_reviewer
+    end
+
+    it "should pass package-name to the AirtableWorker" do
+      expected_custom_params = { reviewer: "@reviewer_21", package_name: "Superpackage!" }
+
+      issue_body = "...Package: <!--package-name-->Superpackage!<!--end-package-name--> ..."
+      allow(@responder).to receive(:issue_body).and_return(issue_body)
+
+      expect(Ropensci::AirtableWorker).to receive(:perform_async).with(:assign_reviewer,
+                                                                       @expected_params,
+                                                                       @expected_locals,
+                                                                       expected_custom_params)
+
+      @responder.airtable_add_reviewer
+    end
+  end
+
+  describe "#airtable_remove_reviewer" do
+    before do
+      disable_github_calls_for(@responder)
+      @responder.context = OpenStruct.new(issue_id: 33,
+                                          issue_title: "Bioinfo package",
+                                          issue_author: "@uthor",
+                                          repo: "openjournals/testing",
+                                          sender: "xuanxu")
+      allow(@responder).to receive(:reviewer).and_return("@reviewer_21")
+      @expected_params = { airtable_token: "1234567890", no_reviewer_text: "TBD" }
+      @expected_locals = { bot_name: "ropensci-review-bot",
+                           issue_id: 33,
+                           repo: "openjournals/testing",
+                           sender: "xuanxu",
+                           issue_author: "@uthor"}
+    end
+
+    it "should create an AirtableWorker job to remove reviewer" do
+      expected_custom_params = { reviewer: "@reviewer_21" }
+      expect(Ropensci::AirtableWorker).to receive(:perform_async).with(:remove_reviewer,
+                                                                       @expected_params,
+                                                                       @expected_locals,
+                                                                       expected_custom_params)
+
+      @responder.airtable_remove_reviewer
+    end
+  end
+
+  describe "#airtable_slack_invites" do
+    before do
+      disable_github_calls_for(@responder)
+      @responder.context = OpenStruct.new(issue_id: 33,
+                                          issue_title: "Bioinfo package",
+                                          issue_author: "@uthor",
+                                          repo: "openjournals/testing",
+                                          sender: "xuanxu")
+      allow(@responder).to receive(:reviewer).and_return("@reviewer_21")
+      @expected_params = { airtable_token: "1234567890", no_reviewer_text: "TBD" }
+      @expected_locals = { bot_name: "ropensci-review-bot",
+                           issue_id: 33,
+                           repo: "openjournals/testing",
+                           sender: "xuanxu",
+                           issue_author: "@uthor"}
+    end
+
+    it "should create an AirtableWorker job to add entries to slack_invites" do
+      expected_custom_params = { reviewers: ["rev1", "rev2"], author: "author", author_others: ["other"], package_name: "Bioinfo package" }
+
+      issue_body = "...Package: <!--package-name--><!--end-package-name--> ..." +
+                   ".. First author: <!--author1-->@author<!--end-author1--> ..." +
+                   ".. Other authors: <!--author-others-->@other<!--end-author-others--> ..."
+
+      allow(@responder).to receive(:issue_body).and_return(issue_body)
+      expect(Ropensci::AirtableWorker).to receive(:perform_async).with(:slack_invites,
+                                                                       @expected_params,
+                                                                       @expected_locals,
+                                                                       expected_custom_params)
+
+      @responder.airtable_slack_invites(["@rev1", "rev2"])
     end
   end
 

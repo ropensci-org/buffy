@@ -41,7 +41,11 @@ module Ropensci
         respond_by_submission_type
         add_collaborator(reviewer) if add_as_collaborator?(reviewer)
         add_assignee(reviewer) if add_as_assignee?(reviewer)
-        process_labeling if new_list.size == 2
+        airtable_add_reviewer
+        if new_list.size == 2
+          process_labeling
+          airtable_slack_invites(new_list)
+        end
       end
     end
 
@@ -54,9 +58,37 @@ module Ropensci
         respond("#{reviewer} removed from the reviewers list!")
         remove_assignee(reviewer) if add_as_assignee?(reviewer)
         process_reverse_labeling if new_list.size == 1
+        airtable_remove_reviewer
       else
         respond("#{reviewer} is not in the reviewers list")
       end
+    end
+
+    def airtable_add_reviewer
+      package_name = read_value_from_body("package-name")
+      package_name = context.issue_title if package_name.empty?
+      Ropensci::AirtableWorker.perform_async(:assign_reviewer,
+                                             params,
+                                             locals,
+                                             { reviewer: reviewer, package_name: package_name })
+    end
+
+    def airtable_remove_reviewer
+      Ropensci::AirtableWorker.perform_async(:remove_reviewer, params, locals, { reviewer: reviewer })
+    end
+
+    def airtable_slack_invites(all_reviewers)
+      all_reviewers = all_reviewers.map {|r| user_login(r)}
+      author1 = read_value_from_body("author1")
+      author1 = context.issue_author if author1.empty?
+      author_others = read_value_from_body("author-others").split(",").map(&:strip) - [""]
+      author_others = author_others.map {|a| user_login(a)}
+      package_name = read_value_from_body("package-name")
+      package_name = context.issue_title if package_name.empty?
+      Ropensci::AirtableWorker.perform_async(:slack_invites,
+                                             params,
+                                             locals,
+                                             { reviewers: all_reviewers, author: user_login(author1), author_others: author_others, package_name: package_name })
     end
 
     def reviewer
