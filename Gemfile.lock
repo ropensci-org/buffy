@@ -15,15 +15,23 @@ GEM
     diff-lcs (1.4.4)
     dotenv (2.7.6)
     escape_utils (1.2.1)
-    faraday (1.4.1)
+    faraday (1.5.0)
+      faraday-em_http (~> 1.0)
+      faraday-em_synchrony (~> 1.0)
       faraday-excon (~> 1.1)
+      faraday-httpclient (~> 1.0.1)
       faraday-net_http (~> 1.0)
       faraday-net_http_persistent (~> 1.1)
+      faraday-patron (~> 1.0)
       multipart-post (>= 1.2, < 3)
       ruby2_keywords (>= 0.0.4)
+    faraday-em_http (1.0.0)
+    faraday-em_synchrony (1.0.0)
     faraday-excon (1.1.0)
+    faraday-httpclient (1.0.1)
     faraday-net_http (1.0.1)
     faraday-net_http_persistent (1.1.0)
+    faraday-patron (1.0.0)
     faraday_middleware (1.0.0)
       faraday (~> 1.0)
     github-linguist (7.14.0)
@@ -32,6 +40,9 @@ GEM
       mini_mime (~> 1.0)
       rugged (>= 0.25.1)
     hashdiff (1.0.1)
+    issue (0.1.0)
+      openssl
+      rack
     latex-decode (0.3.2)
     licensee (9.15.1)
       dotenv (~> 2.0)
@@ -121,6 +132,7 @@ DEPENDENCIES
   bibtex-ruby
   faraday
   github-linguist
+  issue
   licensee
   octokit
   openssl

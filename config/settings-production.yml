@@ -48,6 +48,7 @@ buffy:
         - editors
       if:
         role_assigned: editor
+        reject_msg: "Can't assign reviewer because there is no editor assigned for this submission yet"
       no_reviewer_text: "TBD"
       add_labels:
         - 3/reviewer(s)-assigned
