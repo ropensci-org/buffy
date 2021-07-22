@@ -86,8 +86,8 @@ buffy:
       command: check package
       description: Various package checks
       message: Thanks, about to send the query.
-      url: http://kirby.ecohealthalliance.org:22051/editorcheck
-      method: post
+      url: http://138.68.123.59:8000/editorcheck
+      method: get
       data_from_issue:
         - repourl
         - repo
