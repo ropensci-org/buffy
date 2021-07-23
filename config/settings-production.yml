@@ -43,6 +43,12 @@ buffy:
             - 6/approved
           only:
             - editors
+      - stats_grade:
+          command: stats grade
+          description: Show value of "statsgrade" variable
+          data_from_issue:
+            - statsgrade
+          message: "Issue template contains statsgrade = {{statsgrade}}"
     ropensci_reviewers:
       only:
         - editors
