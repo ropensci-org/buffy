@@ -20,6 +20,16 @@ describe Ropensci::AirtableWorker do
       @worker.perform(:remove_reviewer, @config, @locals, {})
     end
 
+    it "should run slack_invites action" do
+      expect(@worker).to receive(:slack_invites)
+      @worker.perform(:slack_invites, @config, @locals, {})
+    end
+
+    it "should run clear_assignments action" do
+      expect(@worker).to receive(:clear_assignments)
+      @worker.perform(:clear_assignments, @config, @locals, {})
+    end
+
     it "should load airtable config and params" do
       @worker.perform(:action, @config, @locals, {})
       expect(@worker.airtable_config[:api_key]).to eq("ropensci_airtable_api_key_abcde")
@@ -131,7 +141,7 @@ describe Ropensci::AirtableWorker do
         expect(reviewer_entry.current_assignment).to eq("")
       end
 
-      it "should not update current assignment i user is not in the reviewers table" do
+      it "should not update current assignment if user is not in the reviewers table" do
         expect(reviewers_table).to receive(:all).and_return([])
         expect(reviewer_entry).to_not receive(:save)
         @worker.remove_reviewer
@@ -259,6 +269,42 @@ describe Ropensci::AirtableWorker do
                                                            role: "author1" })
         expect(slack_invites_table).to receive(:create).with(expected_params_author_1)
         @worker.slack_invites
+      end
+    end
+  end
+
+  describe "#clear_assignments" do
+    before do
+      @worker = described_class.new
+      @worker.context = OpenStruct.new({repo: "testing/approved-package", issue_id: "42"})
+      @worker.params = OpenStruct.new({ reviewers: ["@reviewer21", "@reviewer33"]})
+      @worker.airtable_config = {api_key: "ABC", base_id: "123"}
+      disable_github_calls_for(@worker)
+    end
+
+    describe "connects with Airtable" do
+      let(:reviewer_entry_1) { OpenStruct.new({current_assignment: "http://current.url", id: 111, save: true}) }
+      let(:reviewer_entry_2) { OpenStruct.new({current_assignment: "http://current.review", id: 222, save: true}) }
+      let(:reviewers_table) { double(all: [reviewer_entry_1, reviewer_entry_2]) }
+
+      before do
+        expect(Airrecord).to receive(:table).once.with("ABC", "123", "reviewers-prod").and_return(reviewers_table)
+      end
+
+      it "should remove current assignments in reviewers table" do
+        expect(reviewers_table).to receive(:all).exactly(2).and_return([reviewer_entry_1], [reviewer_entry_2])
+        expect(reviewer_entry_1).to receive(:save)
+        expect(reviewer_entry_2).to receive(:save)
+        @worker.clear_assignments
+        expect(reviewer_entry_1.current_assignment).to eq("")
+        expect(reviewer_entry_2.current_assignment).to eq("")
+      end
+
+      it "should not clear current assignment if user is not in the reviewers table" do
+        expect(reviewers_table).to receive(:all).exactly(2).and_return([])
+        expect(reviewer_entry_1).to_not receive(:save)
+        expect(reviewer_entry_2).to_not receive(:save)
+        @worker.clear_assignments
       end
     end
   end
