@@ -37,7 +37,7 @@ module Ropensci
         if ["bronze", "silver", "gold"].include?(statsgrade)
           labels_to_add << "6/approved-#{statsgrade}"
         else
-          respond("Please add a grade (bronze/silver/gold) before approval.")
+          respond("Please add a grade (#{Ropensci::MintResponder::VALID_METAL_VALUES.join("/")}) before approval.")
           return false
         end
       end
