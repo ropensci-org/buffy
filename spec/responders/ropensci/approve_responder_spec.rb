@@ -91,6 +91,17 @@ describe Ropensci::ApproveResponder do
       @responder.process_message(@msg)
     end
 
+    it "should create a job to create new team" do
+      expect(Ropensci::ApprovedPackageWorker).to receive(:perform_async).
+                                                 with(:new_team,
+                                                      @responder.params,
+                                                      @responder.locals,
+                                                      { team_name: "great-package" })
+
+      allow(@responder).to receive(:issue_body).and_return(@issue_body)
+      @responder.process_message(@msg)
+    end
+
     it "should close issue" do
       expect(@responder).to receive(:close_issue)
 

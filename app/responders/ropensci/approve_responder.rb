@@ -16,6 +16,7 @@ module Ropensci
       update_or_add_value("date-accepted", Time.now.strftime("%Y-%m-%d"), append: false, heading: "Date accepted")
       respond_external_template(params[:template_file], locals) if params[:template_file]
       Ropensci::AirtableWorker.perform_async(:clear_assignments, params, locals, { reviewers: list_of_reviewers })
+      Ropensci::ApprovedPackageWorker.perform_async(:new_team, params, locals, { team_name: @package_name })
       process_labeling
       close_issue
     end
