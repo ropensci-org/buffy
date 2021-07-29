@@ -31,18 +31,16 @@ buffy:
             - 2/seeking-reviewer(s)
           only:
             - editors
-      - approved:
-          command: approve
-          description: Approve the package
-          template_file: approved.md
-          data_from_issue:
-            - reviewers-list
-          remove_labels:
-            - 5/awaiting-reviewer(s)-response
-          add_labels:
-            - 6/approved
-          only:
-            - editors
+    ropensci_approve:
+      only:
+        - editors
+      template_file: approved.md
+      data_from_issue:
+        - reviewers-list
+      remove_labels:
+        - 5/awaiting-reviewer(s)-response
+      add_labels:
+        - 6/approved
     ropensci_reviewers:
       only:
         - editors
@@ -67,10 +65,6 @@ buffy:
         - editors
       no_editor_text: "TBD"
     close_issue_command:
-      - when_approving:
-          only:
-            - editors
-          command: approve
       - out_of_scope:
           only:
             - editors
