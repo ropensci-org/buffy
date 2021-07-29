@@ -17,6 +17,8 @@ module Ropensci
         remove_reviewer
       when :slack_invites
         slack_invites
+      when :clear_assignments
+        clear_assignments
       end
     end
 
@@ -115,6 +117,19 @@ module Ropensci
                                       github: "https://github.com/#{other.login}",
                                       date: Time.now.strftime("%m/%d/%Y"),
                                       role: "author-others")
+      end
+    end
+
+    def clear_assignments
+      params.reviewers.each do |reviewer|
+        reviewer = user_login(reviewer.to_s)
+
+        # Delete current assignment
+        reviewer_entry = airtable_revs.all(filter: "{github} = '#{reviewer}'").first
+        if reviewer_entry
+          reviewer_entry["current_assignment"] = ""
+          reviewer_entry.save
+        end
       end
     end
 
