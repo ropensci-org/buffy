@@ -8,7 +8,7 @@ describe Ropensci::ReviewersDueDateResponder do
 
   before do
     settings = { env: {bot_github_user: "ropensci-review-bot"} }
-    params = { airtable_token: "1234567890", no_reviewer_text: "TBD" }
+    params = { no_reviewer_text: "TBD" }
     @responder = subject.new(settings, params)
   end
 
@@ -268,7 +268,7 @@ describe Ropensci::ReviewersDueDateResponder do
                                           repo: "openjournals/testing",
                                           sender: "xuanxu")
       allow(@responder).to receive(:reviewer).and_return("@reviewer_21")
-      @expected_params = { airtable_token: "1234567890", no_reviewer_text: "TBD" }
+      @expected_params = { no_reviewer_text: "TBD" }
       @expected_locals = { bot_name: "ropensci-review-bot",
                            issue_id: 33,
                            repo: "openjournals/testing",
@@ -314,7 +314,7 @@ describe Ropensci::ReviewersDueDateResponder do
                                           repo: "openjournals/testing",
                                           sender: "xuanxu")
       allow(@responder).to receive(:reviewer).and_return("@reviewer_21")
-      @expected_params = { airtable_token: "1234567890", no_reviewer_text: "TBD" }
+      @expected_params = { no_reviewer_text: "TBD" }
       @expected_locals = { bot_name: "ropensci-review-bot",
                            issue_id: 33,
                            repo: "openjournals/testing",
@@ -342,7 +342,7 @@ describe Ropensci::ReviewersDueDateResponder do
                                           repo: "openjournals/testing",
                                           sender: "xuanxu")
       allow(@responder).to receive(:reviewer).and_return("@reviewer_21")
-      @expected_params = { airtable_token: "1234567890", no_reviewer_text: "TBD" }
+      @expected_params = { no_reviewer_text: "TBD" }
       @expected_locals = { bot_name: "ropensci-review-bot",
                            issue_id: 33,
                            repo: "openjournals/testing",
