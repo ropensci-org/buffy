@@ -47,8 +47,7 @@ buffy:
           only:
             - editors
     ropensci_approve:
-      only:
-        - editors
+      only: editors
       template_file: approved.md
       data_from_issue:
         - reviewers-list
@@ -56,6 +55,8 @@ buffy:
         - 5/awaiting-reviewer(s)-response
       add_labels:
         - 6/approved
+    ropensci_mint:
+      only: editors
     ropensci_reviewers:
       only:
         - editors
