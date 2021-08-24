@@ -23,10 +23,11 @@ buffy:
       external_service:
         url: http://138.68.123.59:8000/editorcheck
         method: get
+        query_params:
+          repo: ropensci/software-review
+          issue_id:
         data_from_issue:
           - repourl
-          - repo
-          - issue_id
         template_file: goodpractice.md
     basic_command:
       - code_of_conduct:
@@ -101,8 +102,9 @@ buffy:
       message: Thanks, about to send the query.
       url: http://138.68.123.59:8000/editorcheck
       method: get
+      query_params:
+        repo: ropensci/software-review
+        issue_id:
       data_from_issue:
         - repourl
-        - repo
-        - issue_id
       template_file: goodpractice.md
