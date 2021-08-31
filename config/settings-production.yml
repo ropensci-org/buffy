@@ -21,6 +21,7 @@ buffy:
           submission-type: "Standard|Estándar|Stats"
       message: "Thanks for submitting to rOpenSci, our editors and @ropensci-review-bot will reply soon. Type `@ropensci-review-bot help` for help."
       external_service:
+        name: editorcheck
         url: http://138.68.123.59:8000/editorcheck
         method: get
         query_params:
