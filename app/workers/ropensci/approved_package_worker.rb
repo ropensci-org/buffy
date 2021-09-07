@@ -1,5 +1,3 @@
-require 'airrecord'
-
 module Ropensci
   class ApprovedPackageWorker < BuffyWorker
 

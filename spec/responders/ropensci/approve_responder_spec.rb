@@ -118,8 +118,25 @@ describe Ropensci::ApproveResponder do
         @issue_body += "... <!--statsgrade-->silver<!--end-statsgrade--> ..."
         allow(@responder).to receive(:issue_body).and_return(@issue_body)
         expect(@responder).to_not receive(:respond).with("Please add a grade (bronze/silver/gold) before approval.")
+        expect(Ropensci::StatsGradesWorker).to receive(:perform_async).
+                                                 with(:label,
+                                                      @responder.locals,
+                                                      { stats_badge_url: nil})
+
         @responder.process_message(@msg)
-        expect(@responder.labels_to_add).to eq(["approved!", "6/approved-silver"])
+      end
+
+      it "should pass stats_badge_url param if present" do
+        @issue_body += "... <!--statsgrade-->silver<!--end-statsgrade--> ..."
+        allow(@responder).to receive(:issue_body).and_return(@issue_body)
+        @responder.params[:stats_badge_url] = "http://ropensci.test/stats_badges:8000"
+        expect(@responder).to_not receive(:respond).with("Please add a grade (bronze/silver/gold) before approval.")
+        expect(Ropensci::StatsGradesWorker).to receive(:perform_async).
+                                                 with(:label,
+                                                      @responder.locals,
+                                                      { stats_badge_url: "http://ropensci.test/stats_badges:8000"})
+
+        @responder.process_message(@msg)
       end
 
       it "should return if statsgrade is not set" do

@@ -2,6 +2,7 @@ require_relative '../../lib/responder'
 
 module Ropensci
   class ApproveResponder < Responder
+
     keyname :ropensci_approve
 
     def define_listening
@@ -35,7 +36,7 @@ module Ropensci
       if submission_type == "stats"
         statsgrade = read_value_from_body("statsgrade").downcase
         if ["bronze", "silver", "gold"].include?(statsgrade)
-          labels_to_add << "6/approved-#{statsgrade}"
+          Ropensci::StatsGradesWorker.perform_async(:label, locals, { stats_badge_url: params[:stats_badge_url] })
         else
           respond("Please add a grade (#{Ropensci::MintResponder::VALID_METAL_VALUES.join("/")}) before approval.")
           return false
