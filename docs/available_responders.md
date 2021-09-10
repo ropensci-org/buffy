@@ -40,4 +40,6 @@ Buffy includes a list of Responders that can be used by configuring them in the 
    :maxdepth: 1
 
    responders/ropensci/reviewers_due_date
+   responders/ropensci/approve
+   responders/ropensci/mint
 ```
