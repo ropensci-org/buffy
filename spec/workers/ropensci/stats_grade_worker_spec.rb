@@ -53,7 +53,7 @@ describe Ropensci::StatsGradesWorker do
       expected_error_msg = "Error: The stats badge service failed with response 500 (called https://tests.test for ropensci/tests issue 12)"
       @worker.params[:stats_badge_url] = "https://tests.test"
       expect(Faraday).to receive(:get).and_return(OpenStruct.new(status: 500))
-      #expect(@worker.logger).to receive(:warn).with(expected_error_msg)
+      expect(@worker.logger).to receive(:warn).with(expected_error_msg)
 
       @worker.label
     end
