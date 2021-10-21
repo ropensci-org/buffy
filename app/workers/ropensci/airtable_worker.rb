@@ -24,9 +24,8 @@ module Ropensci
 
     def assign_reviewer
       reviewer = user_login(params.reviewer.to_s)
-      begin
-        gh_user = Octokit.user(reviewer)
-      rescue Octokit::NotFound
+      gh_user = get_user(reviewer)
+      if gh_user.nil?
         respond("I could not find user @#{reviewer}") and return
       end
 
@@ -68,28 +67,16 @@ module Ropensci
     end
 
     def slack_invites
-      author = begin
-        Octokit.user(params.author)
-      rescue Octokit::NotFound
-        nil
-      end
+      author = get_user(params.author)
 
       reviewers = []
       params.reviewers.each do |reviewer|
-        reviewers << begin
-          Octokit.user(reviewer)
-        rescue Octokit::NotFound
-          nil
-        end
+        reviewers << get_user(reviewer)
       end
 
       author_others = []
       params.author_others.each do |other|
-        author_others << begin
-          Octokit.user(other)
-        rescue Octokit::NotFound
-          nil
-        end
+        author_others << get_user(other)
       end
 
       if author
