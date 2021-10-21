@@ -110,6 +110,13 @@ describe "Github methods" do
     end
   end
 
+  describe "#update_comment" do
+    it "should update issue comment with received content" do
+      expect_any_instance_of(Octokit::Client).to receive(:update_comment).once.with("openjournals/buffy", 12345, "New reviewer checklist here")
+      subject.update_comment(12345, "New reviewer checklist here")
+    end
+  end
+
   describe "#update_issue" do
     it "should update github issue with received options" do
       expect_any_instance_of(Octokit::Client).to receive(:update_issue).once.with("openjournals/buffy", 5, { body: "new body"})
@@ -241,12 +248,19 @@ describe "Github methods" do
 
   describe "#invite_user_to_team" do
     it "should be false if user can't be found" do
-      expect(Octokit).to receive(:user).with("nouser").and_raise(Octokit::NotFound)
+      expect_any_instance_of(Octokit::Client).to receive(:user).with("nouser").and_raise(Octokit::NotFound)
+      expect(subject.logger).to_not receive(:warn)
       expect(subject.invite_user_to_team("nouser", "my-teams")).to be_falsy
     end
 
+    it "should be false if token is invalid" do
+      expect_any_instance_of(Octokit::Client).to receive(:user).with("whatever").and_raise(Octokit::Unauthorized)
+      expect(subject.logger).to receive(:warn).with("Error calling GitHub API! Bad credentials: TOKEN is invalid")
+      expect(subject.invite_user_to_team("whatever", "my-teams")).to be_falsy
+    end
+
     it "should be false if team does not exist" do
-      expect(Octokit).to receive(:user).with("user42").and_return(double(id: 33))
+      expect_any_instance_of(Octokit::Client).to receive(:user).with("user42").and_return(double(id: 33))
       expect(subject).to receive(:team_id).and_return(nil)
       expect(subject).to receive(:add_new_team).and_return(nil)
 
@@ -254,7 +268,7 @@ describe "Github methods" do
     end
 
     it "should be false if can't create team" do
-      expect(Octokit).to receive(:user).and_return(double(id: 33))
+      expect_any_instance_of(Octokit::Client).to receive(:user).and_return(double(id: 33))
       expect(subject).to receive(:team_id).and_return(nil)
       allow_any_instance_of(Octokit::Client).to receive(:create_team).and_return(false)
 
@@ -262,7 +276,7 @@ describe "Github methods" do
     end
 
     it "should try to create team if it does not exist" do
-      expect(Octokit).to receive(:user).and_return(double(id: 33))
+      expect_any_instance_of(Octokit::Client).to receive(:user).and_return(double(id: 33))
       expect(subject).to receive(:team_id).and_return(nil)
       expect(subject).to receive(:add_new_team).with("openjournals/superusers").and_return(double(id: 3333))
       expect(Faraday).to receive(:post).and_return(double(status: 200))
@@ -271,7 +285,7 @@ describe "Github methods" do
     end
 
     it "should be false if invitation can not be created" do
-      expect(Octokit).to receive(:user).and_return(double(id: 33))
+      expect_any_instance_of(Octokit::Client).to receive(:user).and_return(double(id: 33))
       expect(subject).to receive(:team_id).with("openjournals/superusers").and_return(1234)
       expect(Faraday).to receive(:post).and_return(double(status: 403))
 
@@ -279,7 +293,7 @@ describe "Github methods" do
     end
 
     it "should be true when invitation is created" do
-      expect(Octokit).to receive(:user).and_return(double(id: 33))
+      expect_any_instance_of(Octokit::Client).to receive(:user).and_return(double(id: 33))
       expect(subject).to receive(:team_id).with("openjournals/superusers").and_return(1234)
       expect(Faraday).to receive(:post).and_return(double(status: 201))
 

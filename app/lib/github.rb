@@ -59,6 +59,11 @@ module GitHub
     github_client.labels_for_issue(context.repo, context.issue_id).map { |l| l[:name] }
   end
 
+  # Update a Github comment
+  def update_comment(comment_id, content)
+    github_client.update_comment(context.repo, comment_id, content)
+  end
+
   # Update a Github issue
   def update_issue(options)
     github_client.update_issue(context.repo, context.issue_id, options)
@@ -141,7 +146,10 @@ module GitHub
   def invite_user_to_team(username, org_team_name)
     username = user_login(username)
     invitee_id = begin
-      Octokit.user(username).id
+      github_client.user(username).id
+    rescue Octokit::Unauthorized
+      logger.warn("Error calling GitHub API! Bad credentials: TOKEN is invalid")
+      nil
     rescue Octokit::NotFound
       nil
     end
