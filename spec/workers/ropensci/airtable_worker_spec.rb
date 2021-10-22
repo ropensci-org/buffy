@@ -52,13 +52,13 @@ describe Ropensci::AirtableWorker do
       disable_github_calls_for(@worker)
     end
 
-    it "should clean reviewer github user" do
-      expect(Octokit).to receive(:user).with("reviewer21")
+    it "should get reviewer github user" do
+      expect(@worker).to receive(:get_user).with("reviewer21")
       @worker.assign_reviewer
     end
 
     it "should respond to GitHub if user is invalid" do
-      expect(Octokit).to receive(:user).with("reviewer21").and_raise(Octokit::NotFound)
+      expect(@worker).to receive(:get_user).with("reviewer21").and_return(nil)
       expect(@worker).to receive(:respond).with("I could not find user @reviewer21")
 
       @worker.assign_reviewer
@@ -71,7 +71,7 @@ describe Ropensci::AirtableWorker do
 
       before do
         reviewer = OpenStruct.new({ login: "reviewer21", name: "Rev Iewer", email: "rev@iwe.rs" })
-        expect(Octokit).to receive(:user).with("reviewer21").and_return(reviewer)
+        expect(@worker).to receive(:get_user).with("reviewer21").and_return(reviewer)
         expect(Airrecord).to receive(:table).once.with("ABC", "123", "reviewers-prod").and_return(reviewers_table)
         expect(Airrecord).to receive(:table).once.with("ABC", "123", "reviews").and_return(reviews_table)
       end
@@ -182,12 +182,12 @@ describe Ropensci::AirtableWorker do
 
       before do
         expect(Airrecord).to receive(:table).once.with("ABC", "123", "slack-invites").and_return(slack_invites_table)
-        allow(Octokit).to receive(:user).with(nil).and_raise(Octokit::NotFound)
-        allow(Octokit).to receive(:user).with("rev1").and_return(reviewer1)
-        allow(Octokit).to receive(:user).with("rev2").and_return(reviewer2)
-        allow(Octokit).to receive(:user).with("author1").and_return(author1)
-        allow(Octokit).to receive(:user).with("other1").and_return(author2)
-        allow(Octokit).to receive(:user).with("other2").and_return(author3)
+        allow(@worker).to receive(:get_user).with(nil).and_return(nil)
+        allow(@worker).to receive(:get_user).with("rev1").and_return(reviewer1)
+        allow(@worker).to receive(:get_user).with("rev2").and_return(reviewer2)
+        allow(@worker).to receive(:get_user).with("author1").and_return(author1)
+        allow(@worker).to receive(:get_user).with("other1").and_return(author2)
+        allow(@worker).to receive(:get_user).with("other2").and_return(author3)
       end
 
       it "should create an entry for the author" do
