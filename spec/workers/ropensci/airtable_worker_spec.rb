@@ -93,13 +93,13 @@ describe Ropensci::AirtableWorker do
       it "should update reviewer current assignment" do
         expect(reviewer_in_airtable.current_assignment).to eq("")
         @worker.assign_reviewer
-        expect(reviewer_in_airtable.current_assignment).to eq("https://github.com/testing/new_package/33")
+        expect(reviewer_in_airtable.current_assignment).to eq("https://github.com/testing/new_package/issues/33")
       end
 
       it "should create entry in the reviews table" do
         expect(reviews_table).to receive(:create).with(id_no: "33",
                                                        github: [111],
-                                                       onboarding_url: "https://github.com/testing/new_package/33",
+                                                       onboarding_url: "https://github.com/testing/new_package/issues/33",
                                                        package: "TestPackage")
 
         @worker.assign_reviewer

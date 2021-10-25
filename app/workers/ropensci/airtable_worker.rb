@@ -35,7 +35,7 @@ module Ropensci
                             airtable_revs.create(github: gh_user.login, name: gh_user.name, email: gh_user.email)
 
         # Add current_assignment to reviewers
-        reviewer_entry["current_assignment"] = "https://github.com/#{context.repo}/#{context.issue_id}"
+        reviewer_entry["current_assignment"] = issue_url
         reviewer_entry.save
 
         # Add entry in the **reviews** airtable
