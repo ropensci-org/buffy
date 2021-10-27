@@ -15,6 +15,8 @@ module Ropensci
         assign_reviewer
       when :remove_reviewer
         remove_reviewer
+      when :submit_review
+        submit_review(config)
       when :slack_invites
         slack_invites
       when :clear_assignments
@@ -63,6 +65,32 @@ module Ropensci
       review_entry = airtable_reviews.all(filter: "AND({github} = '#{reviewer}', {id_no} = '#{context.issue_id}')").first
       if review_entry
         review_entry.destroy
+      end
+    end
+
+    def submit_review(config)
+      reviewer = user_login(params.reviewer.to_s)
+      review_entry = airtable_reviews.all(filter: "AND({github} = '#{reviewer}', {id_no} = '#{context.issue_id}')").first
+      if review_entry
+        review_entry["review_url"] = params.review_url
+        review_entry["review_hours"] = params.review_time
+        review_entry["review_date"] = params.review_date.strftime("%m/%d/%Y")
+        review_entry.save
+
+        respond("Logged review for _#{reviewer}_ (hours: #{params.review_time})")
+
+        reviewers = params.reviewers.to_s.split(",").map{|r| user_login(r.strip)}
+        unless reviewers.empty? || config['all_reviews_label'].to_s.strip.empty?
+          reviewers_filter = reviewers.inject([]){|_,r| _ << "{github} = '#{r}'"}
+          reviewers_condition = reviewers_filter.join(", ")
+          filter = "AND(OR(#{reviewers_condition}), {id_no} = '#{context.issue_id}')"
+          current_reviews = airtable_reviews.all(filter: filter)
+          finished_reviews_count = current_reviews.count {|r| r["review_url"].to_s.strip != ""}
+
+          label_issue([config["all_reviews_label"]].flatten) if finished_reviews_count == reviewers.size
+        end
+      else
+        respond("Couldn't find entry for _#{reviewer}_ in the reviews log")
       end
     end
 
