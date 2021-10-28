@@ -1,4 +1,4 @@
-require 'airrecord'
+require "airrecord"
 
 module Ropensci
   class AirtableWorker < BuffyWorker
@@ -8,8 +8,8 @@ module Ropensci
     def perform(action, config, locals, params)
       load_context_and_env(locals)
       @params = OpenStruct.new(params)
-      @airtable_config = { api_key: buffy_settings['env']['airtable_api_key'],
-                           base_id: buffy_settings['env']['airtable_base_id'] }
+      @airtable_config = { api_key: buffy_settings["env"]["airtable_api_key"],
+                           base_id: buffy_settings["env"]["airtable_base_id"] }
       case action.to_sym
       when :assign_reviewer
         assign_reviewer
@@ -80,14 +80,28 @@ module Ropensci
         respond("Logged review for _#{reviewer}_ (hours: #{params.review_time})")
 
         reviewers = params.reviewers.to_s.split(",").map{|r| user_login(r.strip)}
-        unless reviewers.empty? || config['all_reviews_label'].to_s.strip.empty?
+
+        add_labels = config["label_when_all_reviews_in"]
+        add_labels = [add_labels] unless add_labels.is_a?(Array)
+        add_labels = add_labels.uniq.compact
+
+        remove_labels = config["unlabel_when_all_reviews_in"]
+        remove_labels = [remove_labels] unless remove_labels.is_a?(Array)
+        remove_labels = remove_labels.uniq.compact
+
+        unless reviewers.empty? || [add_labels, remove_labels].flatten.empty?
           reviewers_filter = reviewers.inject([]){|_,r| _ << "{github} = '#{r}'"}
           reviewers_condition = reviewers_filter.join(", ")
           filter = "AND(OR(#{reviewers_condition}), {id_no} = '#{context.issue_id}')"
           current_reviews = airtable_reviews.all(filter: filter)
           finished_reviews_count = current_reviews.count {|r| r["review_url"].to_s.strip != ""}
 
-          label_issue([config["all_reviews_label"]].flatten) if finished_reviews_count == reviewers.size
+          if finished_reviews_count == reviewers.size
+            label_issue(add_labels) unless add_labels.empty?
+            unless remove_labels.empty?
+              remove_labels.each {|label| unlabel_issue(label)}
+            end
+          end
         end
       else
         respond("Couldn't find entry for _#{reviewer}_ in the reviews log")

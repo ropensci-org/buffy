@@ -16,7 +16,8 @@ Where \<REVIEW_URL\> must be a valid link to a comment in the issue and \<REVIEW
 
 ## Requirements
 
-REVIEW_URL must be a complete url pointing to a comment in the review issue
+REVIEW_URL must be a complete url pointing to a comment in the review issue.
+
 REVIEW_HOURS is numeric. Example of valid values: `4`, `10.5`, `7,5`
 
 ## Settings key
@@ -24,8 +25,12 @@ REVIEW_HOURS is numeric. Example of valid values: `4`, `10.5`, `7,5`
 `ropensci_submit_reviews`
 
 ## Params
+
 ```eval_rst
-:all_reviews_label: *Optional* A label to add to the issue once the number of reviews in Airtable equals the number of reviewers in the issue.
+:label_when_all_reviews_in: *Optional* Labeling to add to the issue once the number of reviews in Airtable equals the number of reviewers in the issue.
+
+:unlabel_when_all_reviews_in: *Optional* Labeling to remove from the issue once the number of reviews in Airtable equals the number of reviewers in the issue.
+
 ```
 
 For the **Airtable** connection to work two parameters must be present in the `env` section of the settings file, configured using environment variable:
@@ -54,8 +59,8 @@ For the **Airtable** connection to work two parameters must be present in the `e
     ropensci_submit_reviews:
       only:
         - editors
-      all_reviews_label:
-        - 4/review-in-awaiting-changes
+      label_when_all_reviews_in: "4/review-in-awaiting-changes"
+      unlabel_when_all_reviews_in: "3/reviewer(s)-assigned"
 ...
 ```
 

@@ -178,7 +178,8 @@ describe Ropensci::AirtableWorker do
                                         review_url: "review-url",
                                         reviewers: "@reviewer21, @reviewer42"})
       @worker.airtable_config = {api_key: "ABC", base_id: "123"}
-      @responder_config = OpenStruct.new({ all_reviews_label: "4/review-in-awaiting-changes" })
+      @responder_config = OpenStruct.new({ label_when_all_reviews_in: "4/review-in-awaiting-changes",
+                                           unlabel_when_all_reviews_in: "3/reviewer(s)-assigned" })
       disable_github_calls_for(@worker)
     end
 
@@ -230,6 +231,7 @@ describe Ropensci::AirtableWorker do
         expect(reviews_table).to receive(:all).with({filter: expected_airtable_query}).and_return([review_21, review_42])
 
         expect(@worker).to receive(:label_issue).with(["4/review-in-awaiting-changes"])
+        expect(@worker).to receive(:unlabel_issue).with("3/reviewer(s)-assigned")
         @worker.submit_review(@responder_config)
       end
 
@@ -243,10 +245,11 @@ describe Ropensci::AirtableWorker do
         expect(reviews_table).to receive(:all).with({filter: expected_airtable_query}).and_return([review_21, review_42])
 
         expect(@worker).to_not receive(:label_issue)
+        expect(@worker).to_not receive(:unlabel_issue)
         @worker.submit_review(@responder_config)
       end
 
-      it "should update labels only if all_reviews_label param exists" do
+      it "should update labels only if labels params exists" do
         reviewer_query = "AND({github} = 'reviewer21', {id_no} = '33')"
         expect(reviews_table).to receive(:all).with({filter: reviewer_query}).and_return([review_in_airtable])
 
@@ -254,7 +257,8 @@ describe Ropensci::AirtableWorker do
         expect(reviews_table).to_not receive(:all).with({filter: expected_airtable_query})
 
         expect(@worker).to_not receive(:label_issue)
-        @worker.submit_review({ all_reviews_label: "" })
+        expect(@worker).to_not receive(:unlabel_issue)
+        @worker.submit_review({ label_when_all_reviews_in: "", unlabel_when_all_reviews_in: nil })
       end
     end
   end
