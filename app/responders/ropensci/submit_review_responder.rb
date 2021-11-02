@@ -7,12 +7,17 @@ module Ropensci
 
     def define_listening
       @event_action = "issue_comment.created"
-      @event_regex = /\A@#{bot_name} submit review (\S+) time ([\d.,]+)+\s?(h|hour|hours)?\.?\s*\z/i
+      @event_regex = /\A@#{bot_name} submit review (\S+) time ([\d.,:]+)+\s?(h|hour|hours)?\.?\s*\z/i
     end
 
     def process_message(message)
       review_url = @match_data[1]
       review_time = @match_data[2].to_s.gsub(",", ".")
+
+      if review_time.include?(":")
+        respond("Error: Invalid time format")
+        return
+      end
 
       if review_url.match?(/#{issue_url}#issuecomment-(\d+)/)
         issue_comment_id = review_url.match(/#{issue_url}#issuecomment-(\d+)/)[1]

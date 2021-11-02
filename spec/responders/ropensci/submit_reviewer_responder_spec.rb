@@ -25,6 +25,7 @@ describe Ropensci::SubmitReviewResponder do
       expect(@responder.event_regex).to match("@ropensci-review-bot submit review https://github.com/ time 10.6 hours")
       expect(@responder.event_regex).to match("@ropensci-review-bot submit review https://github.com/ time 1 hour.")
       expect(@responder.event_regex).to match("@ropensci-review-bot submit review https://github.com/ time 10,6 \r\n")
+      expect(@responder.event_regex).to match("@ropensci-review-bot submit review https://github.com/ time 10:56")
       expect(@responder.event_regex).to_not match("@ropensci-review-bot submit review time")
       expect(@responder.event_regex).to_not match("@wrong-bot submit review https://github.com 9.5")
       expect(@responder.event_regex).to_not match("@ropensci-review-bot msubmit review https://github.com 9.5 another-command")
@@ -43,6 +44,18 @@ describe Ropensci::SubmitReviewResponder do
                                           issue_author: "opener",
                                           repo: "ropensci/testing",
                                           sender: "xuanxu")
+    end
+
+    it "should check for invalid time format" do
+      msg = message_with("url", "10:45")
+      @responder.match_data = @responder.event_regex.match(msg)
+      expect(@responder).to receive(:respond).with("Error: Invalid time format")
+      @responder.process_message(msg)
+
+      msg = message_with("url", "10.5")
+      @responder.match_data = @responder.event_regex.match(msg)
+      expect(@responder).to_not receive(:respond).with("Error: Invalid time format")
+      @responder.process_message(msg)
     end
 
     it "should verify url is valid" do
