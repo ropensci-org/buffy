@@ -104,3 +104,24 @@ buffy:
       data_from_issue:
         - repourl
       template_file: goodpractice.md
+    initial_values:
+      values:
+        - author1:
+          - heading: Submitting Author
+          - warn_if_empty: true
+        - reviewers
+        - repourl:
+          - heading: Repository 
+          - warn_if_empty: true 
+        - submission-type:
+          - heading: Submission Type
+            warn_if_empty: true
+        - editor
+        - language:
+          - heading: Language Code
+            warn_if_empty: true 
+    ropensci_submit_reviews:
+      only:
+        - editors
+      label_when_all_reviews_in: "4/review-in-awaiting-changes"
+      unlabel_when_all_reviews_in: "3/reviewer(s)-assigned"
