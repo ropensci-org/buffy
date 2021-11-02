@@ -7,7 +7,7 @@ module Ropensci
 
     def define_listening
       @event_action = "issue_comment.created"
-      @event_regex = /\A@#{bot_name} (add|remove) (\S+) (as reviewer|to reviewers|from reviewers)\.?\s*\z/i
+      @event_regex = /\A@#{bot_name} (assign|add|remove) (\S+) (as reviewer|to reviewers|from reviewers)\.?\s*\z/i
     end
 
     def process_message(message)
@@ -22,7 +22,7 @@ module Ropensci
 
       add_to_or_remove_from = [add_or_remove, to_or_from].join(" ")
 
-      if ["add to reviewers", "add as reviewer"].include?(add_to_or_remove_from)
+      if ["add to reviewers", "add as reviewer", "assign as reviewer"].include?(add_to_or_remove_from)
         add_reviewer
       elsif add_to_or_remove_from == "remove from reviewers"
         remove_reviewer
@@ -152,7 +152,8 @@ module Ropensci
     end
 
     def example_invocation
-      ["@#{@bot_name} add #{params[:sample_value] || 'xxxxx'} to reviewers",
+      ["@#{@bot_name} assign #{params[:sample_value] || 'xxxxx'} as reviewer",
+       "@#{@bot_name} add #{params[:sample_value] || 'xxxxx'} to reviewers",
        "@#{@bot_name} remove #{params[:sample_value] || 'xxxxx'} from reviewers"]
     end
   end
