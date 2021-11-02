@@ -74,7 +74,7 @@ module Ropensci
       if review_entry
         review_entry["review_url"] = params.review_url
         review_entry["review_hours"] = params.review_time
-        review_entry["review_date"] = params.review_date.strftime("%m/%d/%Y")
+        review_entry["review_date"] = Date.parse(params.review_date).strftime("%m/%d/%Y")
         review_entry.save
 
         respond("Logged review for _#{reviewer}_ (hours: #{params.review_time})")
