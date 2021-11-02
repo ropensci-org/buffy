@@ -20,10 +20,14 @@ describe Ropensci::SubmitReviewResponder do
     it "should define regex" do
       expect(@responder.event_regex).to match("@ropensci-review-bot submit review https://github.com/ropensci/software-review/issues/455#issuecomment-928885183 time 7")
       expect(@responder.event_regex).to match("@ropensci-review-bot submit review https://github.com/ time 10.6")
+      expect(@responder.event_regex).to match("@ropensci-review-bot submit review https://github.com/ time 10.6h")
+      expect(@responder.event_regex).to match("@ropensci-review-bot submit review https://github.com/ time 10.6 h")
+      expect(@responder.event_regex).to match("@ropensci-review-bot submit review https://github.com/ time 10.6 hours")
+      expect(@responder.event_regex).to match("@ropensci-review-bot submit review https://github.com/ time 1 hour.")
       expect(@responder.event_regex).to match("@ropensci-review-bot submit review https://github.com/ time 10,6 \r\n")
       expect(@responder.event_regex).to_not match("@ropensci-review-bot submit review time")
       expect(@responder.event_regex).to_not match("@wrong-bot submit review https://github.com 9.5")
-      expect(@responder.event_regex).to_not match("@ropensci-review-bot mint gold. another-command")
+      expect(@responder.event_regex).to_not match("@ropensci-review-bot msubmit review https://github.com 9.5 another-command")
       expect(@responder.event_regex).to_not match("@ropensci-review-bot submit review https://github.com time 9.5\r\nanother-command")
     end
   end
