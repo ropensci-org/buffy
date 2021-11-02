@@ -1,4 +1,4 @@
-require 'airrecord'
+require "airrecord"
 
 module Ropensci
   class AirtableWorker < BuffyWorker
@@ -8,13 +8,15 @@ module Ropensci
     def perform(action, config, locals, params)
       load_context_and_env(locals)
       @params = OpenStruct.new(params)
-      @airtable_config = { api_key: buffy_settings['env']['airtable_api_key'],
-                           base_id: buffy_settings['env']['airtable_base_id'] }
+      @airtable_config = { api_key: buffy_settings["env"]["airtable_api_key"],
+                           base_id: buffy_settings["env"]["airtable_base_id"] }
       case action.to_sym
       when :assign_reviewer
         assign_reviewer
       when :remove_reviewer
         remove_reviewer
+      when :submit_review
+        submit_review(config)
       when :slack_invites
         slack_invites
       when :clear_assignments
@@ -63,6 +65,46 @@ module Ropensci
       review_entry = airtable_reviews.all(filter: "AND({github} = '#{reviewer}', {id_no} = '#{context.issue_id}')").first
       if review_entry
         review_entry.destroy
+      end
+    end
+
+    def submit_review(config)
+      reviewer = user_login(params.reviewer.to_s)
+      review_entry = airtable_reviews.all(filter: "AND({github} = '#{reviewer}', {id_no} = '#{context.issue_id}')").first
+      if review_entry
+        review_entry["review_url"] = params.review_url
+        review_entry["review_hours"] = params.review_time
+        review_entry["review_date"] = params.review_date.strftime("%m/%d/%Y")
+        review_entry.save
+
+        respond("Logged review for _#{reviewer}_ (hours: #{params.review_time})")
+
+        reviewers = params.reviewers.to_s.split(",").map{|r| user_login(r.strip)}
+
+        add_labels = config["label_when_all_reviews_in"]
+        add_labels = [add_labels] unless add_labels.is_a?(Array)
+        add_labels = add_labels.uniq.compact
+
+        remove_labels = config["unlabel_when_all_reviews_in"]
+        remove_labels = [remove_labels] unless remove_labels.is_a?(Array)
+        remove_labels = remove_labels.uniq.compact
+
+        unless reviewers.empty? || [add_labels, remove_labels].flatten.empty?
+          reviewers_filter = reviewers.inject([]){|_,r| _ << "{github} = '#{r}'"}
+          reviewers_condition = reviewers_filter.join(", ")
+          filter = "AND(OR(#{reviewers_condition}), {id_no} = '#{context.issue_id}')"
+          current_reviews = airtable_reviews.all(filter: filter)
+          finished_reviews_count = current_reviews.count {|r| r["review_url"].to_s.strip != ""}
+
+          if finished_reviews_count == reviewers.size
+            label_issue(add_labels) unless add_labels.empty?
+            unless remove_labels.empty?
+              remove_labels.each {|label| unlabel_issue(label)}
+            end
+          end
+        end
+      else
+        respond("Couldn't find entry for _#{reviewer}_ in the reviews log")
       end
     end
 
