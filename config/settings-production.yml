@@ -120,3 +120,8 @@ buffy:
         - language:
           - heading: Language Code
             warn_if_empty: true 
+    ropensci_submit_reviews:
+      only:
+        - editors
+      label_when_all_reviews_in: "4/review-in-awaiting-changes"
+      unlabel_when_all_reviews_in: "3/reviewer(s)-assigned"
