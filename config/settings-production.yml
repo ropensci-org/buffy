@@ -40,7 +40,7 @@ buffy:
           command: code of conduct
           description: Show our Code of Conduct
           messages:
-            - "Our Code of Conduct can be found at https://ropensci.org"
+            - "Our Code of Conduct can be found at https://ropensci.org/code-of-conduct/"
       - seeking_reviewers:
           command: seeking reviewers
           description: Switch to "seeking reviewers"
