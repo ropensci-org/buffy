@@ -65,6 +65,7 @@ describe Ropensci::SubmitReviewResponder do
       @responder.process_message(msg)
 
       msg = message_with(@valid_comment_url, "10.5")
+      allow(@responder).to receive(:issue_comment).and_raise(Octokit::NotFound)
       @responder.match_data = @responder.event_regex.match(msg)
       expect(@responder).to_not receive(:respond).with("Error: That url is invalid")
       @responder.process_message(msg)
