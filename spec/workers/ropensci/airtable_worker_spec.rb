@@ -174,7 +174,7 @@ describe Ropensci::AirtableWorker do
       @worker.context = OpenStruct.new({repo: "testing/new_package", issue_id: "33"})
       @worker.params = OpenStruct.new({ reviewer: "@reviewer21",
                                         review_time: "9.5",
-                                        review_date: Time.now,
+                                        review_date: Time.now.to_s,
                                         review_url: "review-url",
                                         reviewers: "@reviewer21, @reviewer42"})
       @worker.airtable_config = {api_key: "ABC", base_id: "123"}

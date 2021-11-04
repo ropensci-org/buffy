@@ -47,7 +47,7 @@ module Ropensci
     end
 
     def example_invocation
-      "@#{@bot_name} submit review <REVIEW_URL> time <REVIEW_HOURS(ex. 2/10.5/NA)>"
+      "@#{@bot_name} submit review <REVIEW_URL> time <REVIEW_HOURS(ex. 10.5)>"
     end
   end
 end
