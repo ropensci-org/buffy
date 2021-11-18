@@ -43,6 +43,7 @@ Buffy includes a list of Responders that can be used by configuring them in the 
 
    responders/ropensci/reviewers_due_date
    responders/ropensci/approve
+   responders/ropensci/finalize_transfer
    responders/ropensci/mint
    responders/ropensci/submit_review
 ```
