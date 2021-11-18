@@ -5,7 +5,7 @@ module Ropensci
 
     def define_listening
       @event_action = "issue_comment.created"
-      @event_regex = /\A@#{bot_name} finalize transfer of( [ \w-]+)?\.?\s*\z/i
+      @event_regex = /\A@#{bot_name} (finalize|finalise) transfer of( [ \w-]+)?\.?\s*\z/i
     end
 
     def process_message(message)
@@ -14,7 +14,7 @@ module Ropensci
     end
 
     def verify_package
-      @package_name = match_data[1].to_s.strip
+      @package_name = match_data[2].to_s.strip
       if @package_name.empty?
         respond("Could not finalize transfer: Please, specify the name of the package (should match the name of the team at the rOpenSci org)")
         return false
