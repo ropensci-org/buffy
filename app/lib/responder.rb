@@ -143,7 +143,7 @@ class Responder
       if empty_param?(param_name)
         raise "Configuration Error in #{self.class.name}: No value for #{param_name}."
       else
-        self.class.define_method(param_name.to_s) { params[param_name].strip }
+        self.class.define_method(param_name.to_s) { params[param_name] }
       end
     end
   end
@@ -151,10 +151,10 @@ class Responder
   # True if param's value is empty
   def empty_param?(x)
     return true if params[x].nil?
-    if params[x].is_a?(String)
-      params[x].strip.empty?
-    else
+    if params[x].is_a?(Hash) || params[x].is_a?(Array)
       params[x].empty?
+    else
+      params[x].to_s.strip.empty?
     end
   end
 

@@ -161,6 +161,21 @@ module GitHub
     end
   end
 
+  # Uses the GitHub API to get a list of users in a team
+  def team_members(team_id_or_name)
+    case team_id_or_name
+    when Integer
+      team = team_id_or_name
+    when String
+      team = team_id(team_id_or_name)
+    else
+      team = nil
+    end
+
+    return [] if team.nil?
+    github_client.team_members(team).collect { |e| e.login }.compact.sort
+  end
+
   # Send an invitation to a user to join an organization's team using the GitHub API
   def invite_user_to_team(username, org_team_name)
     username = user_login(username)
@@ -189,8 +204,14 @@ module GitHub
     url = "https://api.github.com/repos/#{repo}/actions/workflows/#{workflow}/dispatches"
     parameters = { inputs: inputs, ref: ref }
     response = Faraday.post(url, parameters.to_json, github_headers)
+    response_ok = response.status.to_i == 204
 
-    response.status.to_i == 204
+    unless response_ok
+      logger.warn("Error triggering workflow #{workflow} at #{repo}: ")
+      logger.warn("   Response #{response.status}: #{response.body}")
+    end
+
+    response_ok
   end
 
   # Returns true if the user in a team member of any of the authorized teams

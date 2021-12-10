@@ -117,12 +117,12 @@ buffy:
           - warn_if_empty: true
         - reviewers
         - repourl:
-          - heading: Repository 
-          - warn_if_empty: true 
+          - heading: Repository
+          - warn_if_empty: true
         - submission-type:
           - heading: Submission Type
             warn_if_empty: true
         - editor
         - language:
           - heading: Language Code
-            warn_if_empty: true 
+            warn_if_empty: true

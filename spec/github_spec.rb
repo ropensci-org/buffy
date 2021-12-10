@@ -333,7 +333,7 @@ describe "Github methods" do
     end
 
     it "should be false if API call is not successful" do
-      expect(Faraday).to receive(:post).and_return(double(status: 401))
+      expect(Faraday).to receive(:post).and_return(double(status: 401, body: "User Unauthorized"))
       expect(subject.trigger_workflow("openjournals/buffy", "action.yml")).to be_falsy
     end
 
@@ -389,6 +389,26 @@ describe "Github methods" do
       expect {
         subject.team_id("buffy/whatever")
       }.to raise_error "Configuration Error: No API access to organization: buffy"
+    end
+  end
+
+  describe "#team_members" do
+    before do
+      members = [double(login: "user1"), double(login: "user2")]
+      allow_any_instance_of(Octokit::Client).to receive(:team_members).with(1111).and_return(members)
+      allow(subject).to receive(:team_id).with("org/team_test").and_return(1111)
+    end
+
+    it "should accept a team id" do
+      expect(subject.team_members(1111)).to eq(["user1", "user2"])
+    end
+
+    it "should accept a team name" do
+      expect(subject.team_members("org/team_test")).to eq(["user1", "user2"])
+    end
+
+    it "should return empty list if the team doesn't exists" do
+      expect(subject.team_members(nil)).to eq([])
     end
   end
 
