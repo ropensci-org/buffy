@@ -64,7 +64,7 @@ describe Ropensci::ApprovedPackageWorker do
 
     it "should create team and invite author if it doesn't exist" do
       allow_any_instance_of(Octokit::Client).to receive(:repository?).with("ropensci/test-package").and_return(true)
-      expect(@worker).to receive(:team_id).with("ropensci/test-package").and_return(nil)
+      expect(@worker).to receive(:api_team_id).with("ropensci/test-package").and_return(nil)
       expect(@worker).to receive(:add_new_team).with("ropensci/test-package").and_return(double(id: 1))
       expect(@worker).to receive(:invite_user_to_team).with("test-package_author", "ropensci/test-package")
 
@@ -74,7 +74,7 @@ describe Ropensci::ApprovedPackageWorker do
 
     it "should reply error message if can't create the team" do
       allow_any_instance_of(Octokit::Client).to receive(:repository?).with("ropensci/test-package").and_return(true)
-      expect(@worker).to receive(:team_id).with("ropensci/test-package").and_return(nil)
+      expect(@worker).to receive(:api_team_id).with("ropensci/test-package").and_return(nil)
       expect(@worker).to receive(:add_new_team).with("ropensci/test-package").and_return(nil)
 
       expect(@worker).to receive(:respond).with("Could not finalize transfer: Error creating the `ropensci/test-package` team")
@@ -83,7 +83,7 @@ describe Ropensci::ApprovedPackageWorker do
 
     it "should add repo to team with admin rights" do
       allow_any_instance_of(Octokit::Client).to receive(:repository?).with("ropensci/test-package").and_return(true)
-      expect(@worker).to receive(:team_id).with("ropensci/test-package").and_return(123)
+      expect(@worker).to receive(:api_team_id).with("ropensci/test-package").and_return(123)
 
       expect(Faraday).to receive(:put).and_return(double(status: 200))
       expected_response = "Transfer completed. The `test-package` team is now owner of [the repository](https://github.com/ropensci/test-package)"
@@ -93,7 +93,7 @@ describe Ropensci::ApprovedPackageWorker do
 
     it "should reply error message if can't add repo to team with admin rights" do
       allow_any_instance_of(Octokit::Client).to receive(:repository?).with("ropensci/test-package").and_return(true)
-      expect(@worker).to receive(:team_id).with("ropensci/test-package").and_return(123)
+      expect(@worker).to receive(:api_team_id).with("ropensci/test-package").and_return(123)
 
       expect(Faraday).to receive(:put).and_return(double(status: 403))
       expected_response = "Could not finalize transfer: Could not add owner rights to the `test-package` team"

@@ -28,7 +28,7 @@ module Ropensci
       org_team_name = "ropensci/#{params.package_name}"
 
       if github_client.repository?(org_team_name)
-        package_team_id = team_id(org_team_name)
+        package_team_id = api_team_id(org_team_name)
 
         if package_team_id.nil?
           package_team = add_new_team(org_team_name)
