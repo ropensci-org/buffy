@@ -31,9 +31,9 @@ buffy:
         method: get
         query_params:
           repo: ropensci/software-review
-          issue_id:
         data_from_issue:
           - repourl
+          - issue_id
         template_file: goodpractice.md
     basic_command:
       - code_of_conduct:
@@ -106,9 +106,9 @@ buffy:
       method: get
       query_params:
         repo: ropensci/software-review
-        issue_id:
       data_from_issue:
         - repourl
+        - issue_id
       template_file: goodpractice.md
     initial_values:
       values:
