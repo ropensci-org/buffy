@@ -5,9 +5,10 @@ class ExternalServiceWorker < BuffyWorker
 
     http_method = service['method'] || 'post'
     url = service['url']
+    headers = service['headers'] || {}
     template = nil
 
-    headers = service['headers'] || {}
+    return true if url.to_s.strip.empty?
 
     query_parameters = service['query_params'] || {}
     service_mapping = service['mapping'] || {}
@@ -25,6 +26,8 @@ class ExternalServiceWorker < BuffyWorker
       post_headers = {'Content-Type' => 'application/json', 'Accept' => 'application/json'}.merge(headers)
       response = Faraday.post(url, parameters.to_json, post_headers)
     end
+
+    return true if service['silent'] == true
 
     if response.status.between?(200, 299)
       if service['template_file']

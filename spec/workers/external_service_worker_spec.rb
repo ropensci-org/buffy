@@ -14,6 +14,15 @@ describe ExternalServiceWorker do
       disable_github_calls_for(@worker)
     end
 
+    it "should do nothing if no url" do
+      no_url = @service_params.merge({'url' => nil})
+      expect(Faraday).to_not receive(:get)
+      expect(Faraday).to_not receive(:post)
+      expect(@worker).to_not  receive(:respond)
+
+      @worker.perform(no_url, @locals)
+    end
+
     it "should use POST by default" do
       expected_url = @service_params['url']
       expected_headers = {'Content-Type' => 'application/json', 'Accept' => 'application/json'}
@@ -57,6 +66,22 @@ describe ExternalServiceWorker do
 
       expect(Faraday).to receive(:post).and_return(response_200_template)
       expect(@worker).to receive(:respond).with("Tests passed")
+      @worker.perform(service_params, @locals)
+    end
+
+    it "should not respond message if silent=true" do
+      service_params = @service_params.merge({ 'silent' => true })
+      expect(Faraday).to receive(:post).and_return(response_200)
+      expect(@worker).to_not receive(:respond)
+
+      @worker.perform(service_params, @locals)
+    end
+
+    it "should not respond errors if silent=true" do
+      service_params = @service_params.merge({ 'silent' => true })
+      expect(Faraday).to receive(:post).and_return(response_400)
+      expect(@worker).to_not receive(:respond)
+
       @worker.perform(service_params, @locals)
     end
 
