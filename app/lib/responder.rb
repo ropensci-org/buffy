@@ -195,7 +195,20 @@ class Responder
   # Create background workers to perform external calls
   def process_external_service(service_config, service_data)
     unless service_config.nil? || service_config.empty?
-      ExternalServiceWorker.perform_async(service_config, service_data)
+      service_locals = get_data_from_issue(service_config[:data_from_issue]).merge(service_data)
+      ExternalServiceWorker.perform_async(service_config, service_locals)
+    end
+  end
+
+  # Call a different responder bypassing authorization
+  def process_other_responder(other_responder={})
+    matching_responder = ResponderRegistry.get_responder(@settings, other_responder[:responder_key], other_responder[:responder_name])
+
+    if matching_responder
+      matching_responder.context = context
+      msg = other_responder[:message] || ""
+      matching_responder.match_data = matching_responder.event_regex.match(msg) unless msg.empty?
+      matching_responder.process_message(msg)
     end
   end
 
