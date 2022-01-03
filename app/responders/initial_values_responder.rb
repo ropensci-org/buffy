@@ -47,7 +47,7 @@ class InitialValuesResponder < Responder
     end
 
     unless empty.empty?
-      respond("Your subission template is missing the following values: #{empty.join(', ')}")
+      respond("Your submission template is missing the following values: #{empty.join(', ')}")
     end
   end
 
