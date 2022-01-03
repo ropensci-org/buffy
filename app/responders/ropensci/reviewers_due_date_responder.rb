@@ -23,6 +23,7 @@ module Ropensci
       add_to_or_remove_from = [add_or_remove, to_or_from].join(" ")
 
       if ["add to reviewers", "add as reviewer", "assign as reviewer"].include?(add_to_or_remove_from)
+      if ["add to reviewers", "add as reviewer", "assign as reviewer", "assign to reviewers"].include?(add_to_or_remove_from)
         add_reviewer
       elsif add_to_or_remove_from == "remove from reviewers"
         remove_reviewer
@@ -153,7 +154,10 @@ module Ropensci
 
     def example_invocation
       ["@#{@bot_name} assign #{params[:sample_value] || 'xxxxx'} as reviewer",
+<<<<<<< HEAD
        "@#{@bot_name} add #{params[:sample_value] || 'xxxxx'} to reviewers",
+=======
+>>>>>>> 0f54d338acad85de2acca29ead7edbb918b53b19
        "@#{@bot_name} remove #{params[:sample_value] || 'xxxxx'} from reviewers"]
     end
   end

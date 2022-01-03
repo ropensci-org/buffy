@@ -3,15 +3,15 @@ require_relative "./spec_helper.rb"
 describe ResponderRegistry do
 
   before do
-    @config = { responders: { "hello" => { hidden: true },
-                              "assign_reviewer_n" => { only: "editors" },
+    @config = Sinatra::IndifferentHash[responders: { "hello" => { hidden: true },
+                              "assign_editor" => { only: "editors" },
                               "set_value" => [
                                 { version: { only: "editors" }},
                                 { archival: { name: "archive", sample_value: "doi42" }},
                                 { url: nil }
                               ]
                             }
-              }
+              ]
   end
 
   describe "initialization" do
@@ -22,10 +22,11 @@ describe ResponderRegistry do
 
     it "should load single responders" do
       registry = described_class.new(@config)
-      single_responder = registry.responders.select { |r| r.kind_of?(AssignReviewerNResponder) }
+      single_responder = registry.responders.select { |r| r.kind_of?(AssignEditorResponder) }
 
       expect(single_responder.size).to eq(1)
-      expect(single_responder[0].params).to eq({ only: "editors" })
+      expect(single_responder[0].params).to eq("only" => "editors")
+      expect(single_responder[0].params[:only]).to eq("editors")
     end
 
     it "should load multiple instances of the same responder" do
@@ -52,6 +53,7 @@ describe ResponderRegistry do
   describe "loading responders" do
     it "should retrieve all teams ids once" do
       @config[:teams] = { editors: 11, eics: "openjournals/eics" }
+      @config[:env] = { gh_access_token: "ABC123" }
       expect_any_instance_of(Octokit::Client).to receive(:organization_teams).once.with("openjournals").and_return([{name: "eics", id: 42}])
       expected_teams = { editors: 11, eics: 42 }
 
@@ -77,4 +79,30 @@ describe ResponderRegistry do
     end
   end
 
+  describe ".get_responder" do
+    it "should return a responder by key" do
+      responder = ResponderRegistry.get_responder(@config, "assign_editor")
+      expect(responder).to_not be_nil
+      expect(responder).to be_a(AssignEditorResponder)
+      expect(responder.params).to eq({ "only" => "editors" })
+    end
+
+    it "should return an instance by name" do
+      responder = ResponderRegistry.get_responder(@config, "set_value", "archival")
+      expect(responder).to_not be_nil
+      expect(responder).to be_a(SetValueResponder)
+      expect(responder.params).to eq({ "name" => "archive", "sample_value" => "doi42" })
+    end
+
+    it "should return nil if no instance matching key+name" do
+      expect(ResponderRegistry.get_responder(@config, "set_value")).to be_nil
+      expect(ResponderRegistry.get_responder(@config, "set_value", "branch")).to be_nil
+      expect(ResponderRegistry.get_responder(@config, "assign_editor", "topic")).to be_nil
+    end
+
+    it "should return nil if no key or config" do
+      expect(ResponderRegistry.get_responder({}, :set_value)).to be_nil
+      expect(ResponderRegistry.get_responder(@config, nil)).to be_nil
+    end
+  end
 end

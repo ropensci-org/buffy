@@ -20,6 +20,8 @@ describe Ropensci::ReviewersDueDateResponder do
     it "should define regex" do
       expect(@responder.event_regex).to match("@ropensci-review-bot add @maelle to reviewers")
       expect(@responder.event_regex).to match("@ropensci-review-bot add @maelle as reviewer")
+      expect(@responder.event_regex).to match("@ropensci-review-bot assign @maelle as reviewer")
+      expect(@responder.event_regex).to match("@ropensci-review-bot assign @maelle to reviewers")
       expect(@responder.event_regex).to match("@ropensci-review-bot remove @maelle from reviewers  \r\n")
       expect(@responder.event_regex).to_not match("@ropensci-review-bot add to reviewers")
       expect(@responder.event_regex).to_not match("@ropensci-review-bot add as reviewers")
@@ -444,13 +446,13 @@ describe Ropensci::ReviewersDueDateResponder do
 
     it "#example_invocation should use custom sample value if present" do
       @responder.params = { sample_value: "@reviewer_username" }
-      expect(@responder.example_invocation[0]).to eq("@ropensci-review-bot add @reviewer_username to reviewers")
+      expect(@responder.example_invocation[0]).to eq("@ropensci-review-bot assign @reviewer_username as reviewer")
       expect(@responder.example_invocation[1]).to eq("@ropensci-review-bot remove @reviewer_username from reviewers")
     end
 
     it "#example_invocation should have default sample value" do
       @responder.params = {}
-      expect(@responder.example_invocation[0]).to eq("@ropensci-review-bot add xxxxx to reviewers")
+      expect(@responder.example_invocation[0]).to eq("@ropensci-review-bot assign xxxxx as reviewer")
       expect(@responder.example_invocation[1]).to eq("@ropensci-review-bot remove xxxxx from reviewers")
     end
   end

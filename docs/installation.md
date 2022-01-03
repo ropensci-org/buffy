@@ -18,7 +18,7 @@ This will be the user responding to commands in the reviews repo.
   ![GitHub's signup page](./images/signup.png "GitHub's signup page")
 
 
-**2.** Go to `Settings >> Developer settings >> Personal access tokens` and create a new token with at least this scopes: `public_repo`, `repo:invite`, `read:org` and `read:user`. Save that token, it will be your `BUFFY_GH_ACCESS_TOKEN`.
+**2.** Go to `Settings >> Developer settings >> Personal access tokens` and create a new token with these scopes: `public_repo`, `repo:invite`, `read:org`, `read:user` and, if using the approval responder, `admin:org` (as the app will create teams and invite members to the ropensci organization). Save that token, it will be your `BUFFY_GH_ACCESS_TOKEN`.
 
   ![Settings >> Developer settings >> Personal access tokens](./images/access_token.png "Settings >> Developer settings >> Personal access tokens")
 
@@ -54,6 +54,9 @@ We will use here [Heroku](https://www.heroku.com) as an example service to deplo
         BUFFY_GH_ACCESS_TOKEN: <the_access_token_for_the_bot_created_in_the_previous_step>
         BUFFY_GH_SECRET_TOKEN: <a_random_string>
         RACK_ENV: production
+
+**2b.** You can set the Ruby version to install using the CUSTOM_RUBY_VERSION env var. Unless you need any other specific version, please add also a Config Var named CUSTOM_RUBY_VERSION with the value of the latest version listed in the [Buffy tested Ruby versions](https://github.com/openjournals/buffy/blob/main/.github/workflows/tests.yml#L10).
+
 
 **3.** You can set Heroku to automatically redeploy when new commits are added. You can also add heroku as a git remote and deploy manually using
 

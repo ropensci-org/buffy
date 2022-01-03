@@ -32,18 +32,41 @@ The response from the external service should be in JSON format. It will be pars
 `external_service`
 
 ## Params
+
+_General_
+
 ```eval_rst
 :name: *Required*. The name for this service.
 :command: *Required*. The command this responder will listen to.
+:description: The description of the service. It will show in the help command if the responder is not hidden.
+:example_invocation:  Optional string to show as an example of the command being used when the help command is invoked.
+:message: An optional message to reply when the command is received, before the external service is called.
+
+```
+
+_Configuring the request_
+
+```eval_rst
 :url: *Required*. The url to call.
 :method: The HTTP method to use. Valid values: [get, post]. Default is **post**.
-:description: The description of the service. It will show in the help command if the responder is not hidden.
-:message: An optional message to reply when the command is received, before the external service is called.
-:template_file: The optional template file to use to build the response message.
 :headers: *<Array>* An optional list of *key: value* pairs to be passed as headers in the external service request.
-:data_from_issue: *<Array>* An optional list of values that will be extracted from the issue's body and used to fill the template.
 :query_params: *<Array>* An optional list of params to add to the query of the external call. Common place to add API_KEYS or other authentication info.
+:data_from_issue: *<Array>* An optional list of values that will be extracted from the issue's info or issue's body and sent as query params to the service call. Available info includes: *issue_id*, *issue_author*, *repo*, *sender*, *bot_name*, and any variable included in the body of the issue. Also if the command matches any data it will be available as *match_data_1*, *match_data_2*, etc.
 :mapping: *<Array>* An optional mapping of variable names in the query of the external service call.
+
+```
+
+_Configuring the response_
+
+```eval_rst
+:template_file: The optional template file to use to build the response message if the response from the external service is successful.
+:success_msg: Optional message to respond with if the service call is successful.
+:error_msg: Optional message to respond with if the service call fails with a 400/500 response.
+:silent: *<Boolean>* Optional parameter, if **true** the responder won't reply after the external service is called (*template_file*, *success_msg* and *error_msg* will overwrite this if present). Default is **false**.
+:add_labels: *<Array>* Optional parameter. Labels to add to the issue if the external service call is successful.
+:remove_labels: *<Array>* Optional parameter. Labels to remove from the issue if the external service call is successful.
+:close: *<Boolean>* Optional parameter, if **true** the responder will close the issue if the external service call is successful. Default is **false**.
+
 
 ```
 

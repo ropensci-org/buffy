@@ -23,10 +23,14 @@ For example, if you configure the command to be _list editors_, it would respond
 ```eval_rst
 :command: The command this responder will listen to.
 :description:  *Optional* String to show when the help command is invoked.
+:example_invocation:  *Optional* String to show as an example of the command being used when the help command is invoked.
 :message: *Optional* A text message to use as reply.
 :messages: *Optional <Array>* A list of text messages to respond with.
 :template_file: *Optional* A template file to use to build the response message.
 :data_from_issue: *<Array>* An optional list of values that will be extracted from the issue's body and used to fill the template.
+:external_call: *Optional* Configuration for a external service call. All available subparams are described in the `external_service docs`_.
+
+.. _`external_service docs`: ./external_service.html#params
 ```
 
 ## Examples

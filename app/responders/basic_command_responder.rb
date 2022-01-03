@@ -17,6 +17,7 @@ class BasicCommandResponder < Responder
       params[:messages].each {|msg| respond(msg)}
     end
     respond_external_template(params[:template_file], locals) if params[:template_file]
+    process_external_service(params[:external_call], locals.merge({command: command})) if params[:external_call]
     process_labeling
   end
 
@@ -25,6 +26,6 @@ class BasicCommandResponder < Responder
   end
 
   def example_invocation
-    "@#{bot_name} #{command}"
+    params[:example_invocation] || "@#{bot_name} #{command}"
   end
 end

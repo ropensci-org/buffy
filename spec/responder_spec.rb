@@ -278,6 +278,14 @@ describe Responder do
       expect(@responder.locals).to eq(expected_locals)
     end
 
+    it "should add info from the event_regex if present" do
+      expected_locals = Sinatra::IndifferentHash[issue_id: 5, issue_author: "opener", bot_name: "botsci", repo: "openjournals/buffy", sender: "user33", match_data_1: "@xuanxu"]
+      @responder.event_regex = /\A@bot assign (.*) as editor\z/i
+      @responder.match_data = @responder.event_regex.match("@bot assign @xuanxu as editor")
+
+      expect(@responder.locals).to eq(expected_locals)
+    end
+
     it "context data should not be overwritten by issue body data" do
       @responder.context["issue_body"] += "<!--issue_id-->42<!--end-issue_id--><!--x-->Y<!--end-x-->"
       @responder.params = {data_from_issue: ["x", "issue_id"]}
@@ -304,6 +312,26 @@ describe Responder do
     it "should extract listed values from issue body" do
       expected = Sinatra::IndifferentHash[first: "1111", third: "3333"]
       expect(@responder.get_data_from_issue(["first", "third"])).to eq(expected)
+    end
+  end
+
+  describe "get_data_from_command_regex" do
+    before do
+      @responder = described_class.new({ env: {bot_github_user: 'botsci'} }, {})
+    end
+
+    it "should be empty if no values captured in the event_regex" do
+      @responder.event_regex = /\A@bot generate pdf\.?\s*\z/i
+      @responder.responds_to?("@bot generate pdf")
+      expected = Sinatra::IndifferentHash.new
+      expect(@responder.get_data_from_command_regex).to eq(expected)
+    end
+
+    it "should extract captured values from event_regex" do
+      @responder.event_regex = /\A@bot assign (.*) as (.*)\.?\s*\z/i
+      @responder.responds_to?("@bot assign @astrophysics-editor as editor")
+      expected = Sinatra::IndifferentHash[match_data_1: "@astrophysics-editor", match_data_2: "editor"]
+      expect(@responder.get_data_from_command_regex).to eq(expected)
     end
   end
 
@@ -402,28 +430,29 @@ describe Responder do
     it "should be true when param's value is an empty string" do
       subject.params = { first_name: "", last_name: "       " }
 
-      expect(subject.empty_param?("first_name")).to be_truthy
-      expect(subject.empty_param?("last_name")).to be_truthy
+      expect(subject.empty_param?(:first_name)).to be_truthy
+      expect(subject.empty_param?(:last_name)).to be_truthy
     end
 
     it "should be true when param's value is an empty array" do
       subject.params = { values: [] }
 
-      expect(subject.empty_param?("values")).to be_truthy
+      expect(subject.empty_param?(:values)).to be_truthy
     end
 
     it "should be true when param's value is an empty hash" do
       subject.params = { values: {} }
 
-      expect(subject.empty_param?("values")).to be_truthy
+      expect(subject.empty_param?(:values)).to be_truthy
     end
 
     it "should be false when param's value is present" do
-      subject.params = { labels: ["archived", "accepted"], name: "Buffy", required: {version: "1.0"} }
+      subject.params = { labels: ["archived", "accepted"], name: "Buffy", required: {version: "1.0"}, id: 33}
 
-      expect(subject.empty_param?("labels")).to be_truthy
-      expect(subject.empty_param?("name")).to be_truthy
-      expect(subject.empty_param?("required")).to be_truthy
+      expect(subject.empty_param?(:labels)).to be_falsy
+      expect(subject.empty_param?(:name)).to be_falsy
+      expect(subject.empty_param?(:required)).to be_falsy
+      expect(subject.empty_param?(:id)).to be_falsy
     end
   end
 
@@ -497,6 +526,63 @@ describe Responder do
         expect(@responder.labels_to_add).to eq(["pending review", "ongoing"])
         expect(@responder.labels_to_remove).to eq(["reviewed", "approved", "pending publication"])
       end
+    end
+  end
+
+  describe "#process_external_service" do
+    before do
+      @responder = described_class.new({env: { bot_github_user: "botsci" }}, {})
+      disable_github_calls_for(@responder)
+    end
+
+    it "should do nothing if no external service config present" do
+      expect { @responder.process_external_service({}, {}) }.to_not change(ExternalServiceWorker.jobs, :size)
+      expect { @responder.process_external_service("", {}) }.to_not change(ExternalServiceWorker.jobs, :size)
+      expect { @responder.process_external_service(nil, {}) }.to_not change(ExternalServiceWorker.jobs, :size)
+    end
+
+    it "should add an ExternalServiceWorker to the jobs queue" do
+      expect { @responder.process_external_service({ url: "https://theoj.org" }, {}) }.to change(ExternalServiceWorker.jobs, :size).by(1)
+    end
+
+    it "should pass right info to the worker" do
+      expected_params = { name: "test-service", command: "run tests", url: "http://testing.openjournals.org" }
+      expected_locals = { bot_name: "botsci", issue_author: "opener", issue_id: 33, repo: "openjournals/testing", sender: "xuanxu" }
+      expect(ExternalServiceWorker).to receive(:perform_async).with(expected_params, expected_locals)
+      @responder.process_external_service(expected_params, expected_locals)
+    end
+  end
+
+  describe "#process_other_responder" do
+    before do
+      settings = { bot_github_user: "botsci",
+                   responders: { github_action:
+                                [{ draft_paper: {
+                                     command: "generate pdf",
+                                     workflow_repo: "openjournals/joss-papers-testing",
+                                     workflow_name: "draft-paper.yml",
+                                     workflow_ref: "master",
+                                     description: "Generates the pdf paper",
+                                     message: "Attempting PDF compilation. Reticulating splines etc...",
+                                     data_from_issue: ["branch", "issue_id"]}
+                                }]}}
+
+      @responder = described_class.new(settings, {})
+      @responder.context = OpenStruct.new(sender: "tester", issue_id: 33, issue_body: "", repo: "openjournals/buffy")
+      disable_github_calls_for(@responder)
+    end
+
+    it "should do nothing if no responder found" do
+      expect_any_instance_of(GithubActionResponder).to_not receive(:process_message)
+
+      @responder.process_other_responder({responder_key: :github_action})
+    end
+
+    it "should call process_message in found responder" do
+      allow_any_instance_of(GithubActionResponder).to receive(:process_message).with("test").and_return("OK")
+
+      result = @responder.process_other_responder({responder_key: :github_action, responder_name: :draft_paper, message: "test"})
+      expect(result).to eq("OK")
     end
   end
 

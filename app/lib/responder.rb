@@ -143,7 +143,7 @@ class Responder
       if empty_param?(param_name)
         raise "Configuration Error in #{self.class.name}: No value for #{param_name}."
       else
-        self.class.define_method(param_name.to_s) { params[param_name].strip }
+        self.class.define_method(param_name.to_s) { params[param_name] }
       end
     end
   end
@@ -151,16 +151,17 @@ class Responder
   # True if param's value is empty
   def empty_param?(x)
     return true if params[x].nil?
-    if params[x].is_a?(String)
-      params[x].strip.empty?
-    else
+    if params[x].is_a?(Hash) || params[x].is_a?(Array)
       params[x].empty?
+    else
+      params[x].to_s.strip.empty?
     end
   end
 
   # Create a hash with the basic config info
   # and adds any data from the body issue requested via :data_from_issue param
   def locals
+    from_command = get_data_from_command_regex
     from_context = Sinatra::IndifferentHash[
                      issue_id: context.issue_id,
                      issue_author: context.issue_author,
@@ -169,7 +170,7 @@ class Responder
                      bot_name: bot_name ]
     from_body = get_data_from_issue(params[:data_from_issue])
 
-    from_body.merge from_context
+    from_command.merge(from_body, from_context)
   end
 
   # Create a hash with the data from the body issue listed in the source array
@@ -181,6 +182,34 @@ class Responder
       end
     end
     body_issue_data
+  end
+
+  def get_data_from_command_regex
+    command_regex_data = Sinatra::IndifferentHash.new
+    if @match_data && @match_data.size > 1
+      (1..@match_data.size-1).each { |i| command_regex_data["match_data_#{i}"] = @match_data[i] }
+    end
+    command_regex_data
+  end
+
+  # Create background workers to perform external calls
+  def process_external_service(service_config, service_data)
+    unless service_config.nil? || service_config.empty?
+      service_locals = get_data_from_issue(service_config[:data_from_issue]).merge(service_data)
+      ExternalServiceWorker.perform_async(service_config, service_locals)
+    end
+  end
+
+  # Call a different responder bypassing authorization
+  def process_other_responder(other_responder={})
+    matching_responder = ResponderRegistry.get_responder(@settings, other_responder[:responder_key], other_responder[:responder_name])
+
+    if matching_responder
+      matching_responder.context = context
+      msg = other_responder[:message] || ""
+      matching_responder.match_data = matching_responder.event_regex.match(msg) unless msg.empty?
+      matching_responder.process_message(msg)
+    end
   end
 
   # Add/remove labels as configured in the responder' settings

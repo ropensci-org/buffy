@@ -74,7 +74,7 @@ module Ropensci
       if review_entry
         review_entry["review_url"] = params.review_url
         review_entry["review_hours"] = params.review_time
-        review_entry["review_date"] = params.review_date.strftime("%m/%d/%Y")
+        review_entry["review_date"] = Date.parse(params.review_date).strftime("%Y-%m-%d")
         review_entry.save
 
         respond("Logged review for _#{reviewer}_ (hours: #{params.review_time})")
@@ -126,7 +126,7 @@ module Ropensci
                                       name: name_or_github_login(author),
                                       email: author.email,
                                       github: "https://github.com/#{author.login}",
-                                      date: Time.now.strftime("%m/%d/%Y"),
+                                      date: Time.now.strftime("%Y-%m-%d"),
                                       role: "author1")
       end
 
@@ -135,7 +135,7 @@ module Ropensci
                                       name: name_or_github_login(reviewer),
                                       email: reviewer.email,
                                       github: "https://github.com/#{reviewer.login}",
-                                      date: Time.now.strftime("%m/%d/%Y"),
+                                      date: Time.now.strftime("%Y-%m-%d"),
                                       role: "reviewer")
       end
 
@@ -144,7 +144,7 @@ module Ropensci
                                       name: name_or_github_login(other),
                                       email: other.email,
                                       github: "https://github.com/#{other.login}",
-                                      date: Time.now.strftime("%m/%d/%Y"),
+                                      date: Time.now.strftime("%Y-%m-%d"),
                                       role: "author-others")
       end
     end

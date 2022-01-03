@@ -15,7 +15,7 @@ class GithubActionResponder < Responder
     inputs = params[:inputs] || {}
     inputs_from_issue = params[:data_from_issue] || []
     mapping = params[:mapping] || {}
-    ref = params[:ref] || "main"
+    ref = params[:workflow_ref] || "main"
     mapped_parameters = {}
 
     inputs_from_issue.each do |input_from_issue|
@@ -31,6 +31,7 @@ class GithubActionResponder < Responder
 
     if trigger_workflow(workflow_repo, workflow_name, parameters, ref)
       respond(params[:message]) if params[:message]
+      process_labeling
     end
   end
 
@@ -39,6 +40,6 @@ class GithubActionResponder < Responder
   end
 
   def example_invocation
-    "@#{bot_name} #{command}"
+    params[:example_invocation] || "@#{bot_name} #{command}"
   end
 end

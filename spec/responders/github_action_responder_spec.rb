@@ -48,6 +48,26 @@ describe GithubActionResponder do
       @responder.process_message("")
     end
 
+    it "should process labels" do
+      expect(@responder).to receive(:process_labeling)
+      @responder.process_message("")
+    end
+
+    it "should label issue with defined labels" do
+      @responder.params[:add_labels] = ["recommend-accept"]
+      expect(@responder).to receive(:label_issue).with(["recommend-accept"])
+      @responder.process_message("")
+    end
+
+    it "should not label/unlabel the issue if not labels are defined" do
+      @responder.params[:add_labels] = nil
+      expect(@responder).to receive(:process_labeling)
+      expect(@responder).to_not receive(:label_issue)
+      expect(@responder).to_not receive(:unlabel_issue)
+
+      @responder.process_message("")
+    end
+
     it "should run workflow" do
       expected_repo = "openjournals/joss-reviews"
       expected_name = "compiler"
@@ -58,7 +78,7 @@ describe GithubActionResponder do
     end
 
     it "should run workflow with custom inputs and params" do
-      @responder.params = @responder.params.merge({ ref: "v1.2.3",
+      @responder.params = @responder.params.merge({ workflow_ref: "v1.2.3",
                                                     data_from_issue: ["abc", "p"],
                                                     mapping: { input3: :sender, input4: "p" },
                                                     inputs: { input1: "A", input2: "B" }})
@@ -90,6 +110,15 @@ describe GithubActionResponder do
         subject.new({env: {bot_github_user: "botsci"}}, { workflow_name: "test", command: "run tests" })
       }.to raise_error "Configuration Error in GithubActionResponder: No value for workflow_repo."
     end
+  end
+
+  it "#example_invocation can be customized" do
+    responder = subject.new({ env: { bot_github_user: "botsci" } },
+                            { workflow_name: "compile",
+                              workflow_repo: "org/repo",
+                              command: "compile file (.*)",
+                              example_invocation: "@botsci compile file <FILENAME>" })
+    expect(responder.example_invocation).to eq("@botsci compile file <FILENAME>")
   end
 
 end

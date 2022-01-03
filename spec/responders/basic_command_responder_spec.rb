@@ -57,6 +57,21 @@ describe BasicCommandResponder do
       @responder.process_message("@botsci do nothing")
     end
 
+    it "should process external call" do
+      external_call = { url: "https://theoj.org" ,method: "post", query_params: { secret: "A1234567890Z" }, silent: true}
+      @responder.params = { command: "do something", external_call: external_call }
+      expected_locals = @responder.locals.merge({command: "do something"})
+      expect(@responder).to receive(:process_external_service).with(external_call, expected_locals)
+
+      @responder.process_message("@botsci do something")
+    end
+
+    it "should not process external call" do
+      expect(@responder).to_not receive(:process_external_service)
+      @responder.params = { command: "do something" }
+      @responder.process_message("@botsci do something")
+    end
+
     it "should process labeling" do
       expect(@responder).to receive(:process_labeling)
       @responder.params = { command: "only labels" }
@@ -82,6 +97,11 @@ describe BasicCommandResponder do
     it "#example_invocation shows the custom command" do
       responder = subject.new({env: {bot_github_user: "botsci"}}, { command: "list checkpoints" })
       expect(responder.example_invocation).to eq("@botsci list checkpoints")
+    end
+
+    it "#example_invocation can be customized" do
+      responder = subject.new({env: {bot_github_user: "botsci"}}, { command: "list checkpoints for (.*)", example_invocation: "@botsci list checkpoints for @username" })
+      expect(responder.example_invocation).to eq("@botsci list checkpoints for @username")
     end
   end
 

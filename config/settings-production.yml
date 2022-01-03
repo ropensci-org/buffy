@@ -10,6 +10,11 @@ buffy:
     empty: 4475893
     software-review-testing: 4476094
   responders:
+    ropensci_submit_reviews:
+      only:
+        - editors
+      label_when_all_reviews_in: "4/review-in-awaiting-changes"
+      unlabel_when_all_reviews_in: "3/reviewer(s)-assigned"
     help:
     hello:
       hidden: true
@@ -26,16 +31,16 @@ buffy:
         method: get
         query_params:
           repo: ropensci/software-review
-          issue_id:
         data_from_issue:
           - repourl
+          - issue_id
         template_file: goodpractice.md
     basic_command:
       - code_of_conduct:
           command: code of conduct
           description: Show our Code of Conduct
           messages:
-            - "Our Code of Conduct can be found at https://ropensci.org"
+            - "Our Code of Conduct can be found at https://ropensci.org/code-of-conduct/"
       - seeking_reviewers:
           command: seeking reviewers
           description: Switch to "seeking reviewers"
@@ -55,6 +60,7 @@ buffy:
         - 5/awaiting-reviewer(s)-response
       add_labels:
         - 6/approved
+    ropensci_finalize_transfer:
     ropensci_mint:
       only: editors
     ropensci_reviewers:
@@ -100,9 +106,9 @@ buffy:
       method: get
       query_params:
         repo: ropensci/software-review
-        issue_id:
       data_from_issue:
         - repourl
+        - issue_id
       template_file: goodpractice.md
     initial_values:
       values:
@@ -111,17 +117,12 @@ buffy:
           - warn_if_empty: true
         - reviewers
         - repourl:
-          - heading: Repository 
-          - warn_if_empty: true 
+          - heading: Repository
+          - warn_if_empty: true
         - submission-type:
           - heading: Submission Type
             warn_if_empty: true
         - editor
         - language:
           - heading: Language Code
-            warn_if_empty: true 
-    ropensci_submit_reviews:
-      only:
-        - editors
-      label_when_all_reviews_in: "4/review-in-awaiting-changes"
-      unlabel_when_all_reviews_in: "3/reviewer(s)-assigned"
+            warn_if_empty: true

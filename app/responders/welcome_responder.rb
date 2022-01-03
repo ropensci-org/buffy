@@ -19,14 +19,21 @@ class WelcomeResponder < Responder
 
     external_service(params[:external_service]) if params[:external_service]
 
+    if params[:check_references] && !target_repo_value.empty?
+      DOIWorker.perform_async(locals, target_repo_value, branch_name_value)
+    end
+
+    if params[:repo_checks] && !target_repo_value.empty?
+      checks = params[:repo_checks].is_a?(Hash) ? params[:repo_checks][:checks] : nil
+      RepoChecksWorker.perform_async(locals, target_repo_value, branch_name_value, checks)
+    end
+
     process_labeling
   end
 
   def external_service(service_params)
     check_required_params(service_params)
-    locals_with_issue_data = get_data_from_issue(service_params[:data_from_issue]).merge(locals)
-
-    ExternalServiceWorker.perform_async(service_params, locals_with_issue_data)
+    process_external_service(service_params, locals)
   end
 
   def check_required_params(service_params)

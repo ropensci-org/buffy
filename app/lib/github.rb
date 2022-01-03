@@ -141,7 +141,7 @@ module GitHub
   def add_new_team(org_team_name)
     org_name, team_name = org_team_name.split('/')
     begin
-      new_team = github_client.create_team(org_name, { name: team_name })
+      new_team = github_client.create_team(org_name, { name: team_name, privacy: "closed" })
     rescue Octokit::ClientError => gh_err
       logger.warn("Error trying to create team #{org_team_name}: #{gh_err.message}")
       return false
@@ -150,7 +150,7 @@ module GitHub
   end
 
   # Uses the GitHub API to obtain the id of an organization's team
-  def team_id(org_team_name)
+  def api_team_id(org_team_name)
     org_name, team_name = org_team_name.split('/')
     raise "Configuration Error: Invalid team name: #{org_team_name}" if org_name.nil? || team_name.nil?
     begin
@@ -161,13 +161,28 @@ module GitHub
     end
   end
 
+  # Uses the GitHub API to get a list of users in a team
+  def api_team_members(team_id_or_name)
+    case team_id_or_name
+    when Integer
+      team = team_id_or_name
+    when String
+      team = api_team_id(team_id_or_name)
+    else
+      team = nil
+    end
+
+    return [] if team.nil?
+    github_client.team_members(team).collect { |e| e.login }.compact.sort
+  end
+
   # Send an invitation to a user to join an organization's team using the GitHub API
   def invite_user_to_team(username, org_team_name)
     username = user_login(username)
     invitee = get_user(username)
     return false if (invitee.nil? || invitee.id.nil?)
 
-    invited_team_id = team_id(org_team_name)
+    invited_team_id = api_team_id(org_team_name)
     if invited_team_id.nil?
       invited_team_id = add_new_team(org_team_name)
       invited_team_id = invited_team_id.id if invited_team_id
@@ -189,8 +204,14 @@ module GitHub
     url = "https://api.github.com/repos/#{repo}/actions/workflows/#{workflow}/dispatches"
     parameters = { inputs: inputs, ref: ref }
     response = Faraday.post(url, parameters.to_json, github_headers)
+    response_ok = response.status.to_i == 204
 
-    response.status.to_i == 204
+    unless response_ok
+      logger.warn("Error triggering workflow #{workflow} at #{repo}: ")
+      logger.warn("   Response #{response.status}: #{response.body}")
+    end
+
+    response_ok
   end
 
   # Returns true if the user in a team member of any of the authorized teams
@@ -198,8 +219,8 @@ module GitHub
   def user_in_authorized_teams?(user_login)
     @user_authorized ||= begin
       authorized = []
-      authorized_team_ids.each do |team_id|
-        authorized << github_client.team_member?(team_id, user_login)
+      authorized_team_ids.each do |t_id|
+        authorized << github_client.team_member?(t_id, user_login)
         break if authorized.compact.any?
       end
       authorized.compact.any?
@@ -236,7 +257,7 @@ module GitHub
         if id_or_slug.is_a? String
           org_slug, team_slug = id_or_slug.split('/')
           raise "Configuration Error: Invalid team name: #{id_or_slug}" if org_slug.nil? || team_slug.nil?
-          gh ||= Octokit::Client.new(access_token: config[:gh_access_token], auto_paginate: true)
+          gh ||= Octokit::Client.new(access_token: config[:env][:gh_access_token], auto_paginate: true)
           teams_hash[team_name] = begin
             team = gh.organization_teams(org_slug).select { |t| t[:slug] == team_slug || t[:name].downcase == team_slug.downcase }.first
             team.nil? ? nil : team[:id]

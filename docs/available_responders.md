@@ -15,13 +15,13 @@ Buffy includes a list of Responders that can be used by configuring them in the 
    responders/help
    responders/hello
    responders/basic_command
-   responders/assign_reviewer_n
-   responders/remove_reviewer_n
    responders/assign_editor
    responders/remove_editor
+   responders/reviewers_list
    responders/invite
    responders/set_value
    responders/list_of_values
+   responders/list_team_members
    responders/add_remove_assignee
    responders/reviewer_checklist_comment
    responders/add_remove_checklist
@@ -32,6 +32,7 @@ Buffy includes a list of Responders that can be used by configuring them in the 
    responders/initial_values
    responders/welcome
    responders/close_issue_command
+   responders/external_start_review
    responders/external_service
    responders/github_action
 ```
@@ -43,6 +44,7 @@ Buffy includes a list of Responders that can be used by configuring them in the 
 
    responders/ropensci/reviewers_due_date
    responders/ropensci/approve
+   responders/ropensci/finalize_transfer
    responders/ropensci/mint
    responders/ropensci/submit_review
 ```
