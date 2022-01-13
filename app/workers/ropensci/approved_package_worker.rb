@@ -33,8 +33,9 @@ module Ropensci
         if package_team_id.nil?
           package_team = add_new_team(org_team_name)
           package_team_id = package_team.id if package_team
-          invite_user_to_team(params.package_author, org_team_name) if package_team_id
         end
+
+        invite_user_to_team(params.package_author, org_team_name) if package_team_id
 
         if package_team_id
           url = "https://api.github.com/orgs/ropensci/teams/#{params.package_name}/repos/ropensci/#{params.package_name}"
