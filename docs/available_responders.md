@@ -29,12 +29,14 @@ Buffy includes a list of Responders that can be used by configuring them in the 
    responders/check_references
    responders/repo_checks
    responders/thanks
+   responders/reminders
    responders/initial_values
    responders/welcome
    responders/close_issue_command
    responders/external_start_review
    responders/external_service
    responders/github_action
+   responders/wrong_command
 ```
 
 ```eval_rst
