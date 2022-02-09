@@ -15,7 +15,7 @@ Allows [labeling](../../labeling), that will take effect when the second reviewe
 
 ## Requirements
 
-The body of the issue should have the a couple of placeholders marked with HTML comments: the _reviewers-list_ and the _due-dates-list_
+The body of the issue should have a couple of placeholders marked with HTML comments: the _reviewers-list_ and the _due-dates-list_
 
 ```html
 <!--reviewers-list-->  <!--end-reviewers-list-->
