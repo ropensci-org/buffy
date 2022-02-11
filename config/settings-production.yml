@@ -86,6 +86,9 @@ buffy:
       only:
         - editors
       no_editor_text: "TBD"
+    ropensci_set_due_date:
+      only:
+        - editor
     close_issue_command:
       - out_of_scope:
           only:
