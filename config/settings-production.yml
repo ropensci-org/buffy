@@ -29,9 +29,8 @@ buffy:
         name: editorcheck
         url: http://138.68.123.59:8000/editorcheck
         method: get
-        query_params:
-          repo: ropensci/software-review
         data_from_issue:
+          - repo
           - repourl
           - issue_id
         template_file: goodpractice.md
