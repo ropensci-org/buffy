@@ -28,11 +28,11 @@ module Ropensci
       true
     end
 
-    def description
+    def default_description
       "Adds package's repo to the rOpenSci team. This command should be issued after approval and transfer of the package."
     end
 
-    def example_invocation
+    def default_example_invocation
       "@#{@bot_name} finalize transfer of package-name"
     end
   end

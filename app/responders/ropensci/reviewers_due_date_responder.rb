@@ -146,12 +146,12 @@ module Ropensci
       params[:no_reviewer_text] || 'TBD'
     end
 
-    def description
+    def default_description
       ["Add a user to this issue's reviewers list",
        "Remove a user from the reviewers list"]
     end
 
-    def example_invocation
+    def default_example_invocation
       ["@#{@bot_name} assign #{params[:sample_value] || 'xxxxx'} as reviewer",
        "@#{@bot_name} remove #{params[:sample_value] || 'xxxxx'} from reviewers"]
     end

@@ -42,11 +42,11 @@ module Ropensci
       Ropensci::AirtableWorker.perform_async(:submit_review, params, locals, review_data)
     end
 
-    def description
+    def default_description
       "Add a review's info to the ROpenSci logs"
     end
 
-    def example_invocation
+    def default_example_invocation
       "@#{@bot_name} submit review <REVIEW_URL> time <REVIEW_HOURS(ex. 10.5)>"
     end
   end
