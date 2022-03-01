@@ -17,8 +17,9 @@ describe CheckReferencesResponder do
 
     it "should define regex" do
       expect(@responder.event_regex).to match("@botsci check references")
-      expect(@responder.event_regex).to match("@botsci check references    \r\n")
+      expect(@responder.event_regex).to match("@botsci check references    \r\n ignored part")
       expect(@responder.event_regex).to match("@botsci check references from branch custom-branch")
+      expect(@responder.event_regex).to match("@botsci check references from branch custom/branch")
       expect(@responder.event_regex).to match("@botsci check references from branch development    \r\n")
       expect(@responder.event_regex).to_not match("@botsci check references from branch ")
     end

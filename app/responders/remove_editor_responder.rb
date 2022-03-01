@@ -6,7 +6,7 @@ class RemoveEditorResponder < Responder
 
   def define_listening
     @event_action = "issue_comment.created"
-    @event_regex = /\A@#{bot_name} remove editor\.?\s*\z/i
+    @event_regex = /\A@#{bot_name} remove editor\.?\s*$/i
   end
 
   def process_message(message)
@@ -25,11 +25,11 @@ class RemoveEditorResponder < Responder
     params[:no_editor_text] || 'Pending'
   end
 
-  def description
+  def default_description
     "Remove the editor assigned to this submission"
   end
 
-  def example_invocation
+  def default_example_invocation
     "@#{bot_name} remove editor"
   end
 end

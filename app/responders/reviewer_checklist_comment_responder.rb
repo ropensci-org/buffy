@@ -8,7 +8,7 @@ class ReviewerChecklistCommentResponder < Responder
     required_params :template_file
 
     @event_action = "issue_comment.created"
-    @event_regex = /\A@#{bot_name} #{command}\.?\s*\z/i
+    @event_regex = /\A@#{bot_name} #{command}\.?\s*$/i
   end
 
   def process_message(message)
@@ -55,11 +55,11 @@ class ReviewerChecklistCommentResponder < Responder
     params[:command] || "generate my checklist"
   end
 
-  def description
+  def default_description
     "Adds a checklist for the reviewer using this command"
   end
 
-  def example_invocation
+  def default_example_invocation
     "@#{bot_name} #{command}"
   end
 end

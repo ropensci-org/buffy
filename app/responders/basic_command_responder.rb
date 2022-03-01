@@ -8,7 +8,7 @@ class BasicCommandResponder < Responder
     required_params :command
 
     @event_action = "issue_comment.created"
-    @event_regex = /\A@#{bot_name} #{command}\.?\s*\z/i
+    @event_regex = /\A@#{bot_name} #{command}\.?\s*$/i
   end
 
   def process_message(message)
@@ -21,11 +21,11 @@ class BasicCommandResponder < Responder
     process_labeling
   end
 
-  def description
-    params[:description] || "Replies to #{command}"
+  def default_description
+    "Replies to #{command}"
   end
 
-  def example_invocation
-    params[:example_invocation] || "@#{bot_name} #{command}"
+  def default_example_invocation
+    "@#{bot_name} #{command}"
   end
 end

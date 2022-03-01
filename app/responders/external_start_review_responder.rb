@@ -8,7 +8,7 @@ class ExternalStartReviewResponder < Responder
     required_params :external_call
 
     @event_action = "issue_comment.created"
-    @event_regex = /\A@#{bot_name} start review\.?\s*\z/i
+    @event_regex = /\A@#{bot_name} start review\.?\s*$/i
   end
 
   def process_message(message)
@@ -62,11 +62,11 @@ class ExternalStartReviewResponder < Responder
                    editor_login: editor_login })
   end
 
-  def description
+  def default_description
     "Open the review issue"
   end
 
-  def example_invocation
+  def default_example_invocation
     "@#{@bot_name} start review"
   end
 end

@@ -6,7 +6,7 @@ class WrongCommandResponder < Responder
 
   def define_listening
     @event_action = "wrong_command"
-    @event_regex = /\A@#{bot_name} (.*)/i
+    @event_regex = /\A@#{bot_name} (.*)$/i
   end
 
   def process_message(message)
@@ -24,11 +24,11 @@ class WrongCommandResponder < Responder
     end
   end
 
-  def description
+  def default_description
     "Replies when the received command is not understood"
   end
 
-  def example_invocation
+  def default_example_invocation
     "@#{bot_name}: this is a message you don't understand"
   end
 
