@@ -51,11 +51,11 @@ module Ropensci
       @list_of_due_dates ||= read_value_from_body("due-dates-list").strip.split("\n").map(&:strip)
     end
 
-    def description
+    def default_description
       "Change or add a review's due date for a reviewer"
     end
 
-    def example_invocation
+    def default_example_invocation
       "@#{@bot_name} set due date for @reviewer to YYYY-MM-DD"
     end
   end

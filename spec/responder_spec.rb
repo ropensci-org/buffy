@@ -72,6 +72,8 @@ describe Responder do
     before do
       @responder = Responder.new({}, {})
       @responder.context = OpenStruct.new(issue_title: "[REVIEW] Software review",
+                                          issue_labels: [OpenStruct.new(id: 1, name: "accepted"),
+                                                         OpenStruct.new(id: 2, name: "python")],
                                           issue_body: "Test Review\n\n ... description ...\n" +
                                                       "<!--editor-->@editor<!--end-editor-->\n" +
                                                       "<!--editor-2-->L.B.<!--end-editor-2-->\n" +
@@ -140,8 +142,16 @@ describe Responder do
       expect(@responder.meet_conditions?).to be_falsy
     end
 
+    it "should be false if labels condition is not met" do
+      @responder.params = { if: {labels: "whatever"} }
+      expect(@responder.meet_conditions?).to be_falsy
+
+      @responder.params = { if: {labels: ["accepted", "published"]} }
+      expect(@responder.meet_conditions?).to be_falsy
+    end
+
     it "should be false if any condition is not met" do
-      @responder.params = { if: {title: "REVIEW", body: "^Test Review", value_exists: "author", reject_msg: "Can't do that"} }
+      @responder.params = { if: {title: "REVIEW", body: "^Test Review", labels: "accepted", value_exists: "author", reject_msg: "Can't do that"} }
       expect(@responder).to receive(:respond).with("Can't do that")
       expect(@responder.meet_conditions?).to be_falsey
     end
@@ -200,11 +210,23 @@ describe Responder do
       expect(@responder.meet_conditions?).to be_truthy
     end
 
+    it "should be true if labels condition is met" do
+      @responder.params = { if: {labels: "accepted"} }
+      expect(@responder.meet_conditions?).to be_truthy
+
+      @responder.params = { if: {labels: "python"} }
+      expect(@responder.meet_conditions?).to be_truthy
+
+      @responder.params = { if: {labels: ["accepted", "python"]} }
+      expect(@responder.meet_conditions?).to be_truthy
+    end
+
     it "should be true only if all conditions are met" do
       @responder.params = { if: {title: "REVIEW",
                                  body: "^Test Review",
                                  value_exists: "editor-2",
                                  role_assigned: "editor",
+                                 labels: "accepted",
                                  submission_type: "astro",
                                  reject_msg: "Error"} }
       expect(@responder).to_not receive(:respond)
@@ -374,23 +396,51 @@ describe Responder do
   end
 
   describe "#description" do
-    it "should be present for all responders" do
-      ResponderRegistry.available_responders.values.each do |responder_class|
-        responder = responder_class.new({}, sample_params(responder_class))
-        expect(responder.respond_to?(:description)).to eq(true)
-        expect(responder.description).to_not be_nil
-        expect(responder.description).to_not be_empty
-      end
+    it "should be customizable via settings file" do
+      responder = described_class.new({}, { description: "Custom description!" })
+      expect(responder).to_not receive(:default_description)
+      expect(responder.description).to eq("Custom description!")
+    end
+
+    it "should have default value" do
+      responder = described_class.new({}, {})
+      expect(responder).to receive(:default_description).and_return("Default description!")
+      expect(responder.description).to eq("Default description!")
     end
   end
 
   describe "#example_invocation" do
+    it "should be customizable via settings file" do
+      responder = described_class.new({}, { example_invocation: "Custom example_invocation!" })
+      expect(responder).to_not receive(:default_example_invocation)
+      expect(responder.example_invocation).to eq("Custom example_invocation!")
+    end
+
+    it "should have default value" do
+      responder = described_class.new({}, {})
+      expect(responder).to receive(:default_example_invocation).and_return("Default example_invocation!")
+      expect(responder.example_invocation).to eq("Default example_invocation!")
+    end
+  end
+
+  describe "#default_description" do
+    it "should be present for all responders" do
+      ResponderRegistry.available_responders.values.each do |responder_class|
+        responder = responder_class.new({}, sample_params(responder_class))
+        expect(responder.respond_to?(:description)).to eq(true)
+        expect(responder.default_description).to_not be_nil
+        expect(responder.default_description).to_not be_empty
+      end
+    end
+  end
+
+  describe "#default_example_invocation" do
     it "should be present for all responders" do
       ResponderRegistry.available_responders.values.each do |responder_class|
         responder = responder_class.new({}, sample_params(responder_class))
         expect(responder.respond_to?(:example_invocation)).to eq(true)
-        expect(responder.example_invocation).to_not be_nil
-        expect(responder.example_invocation).to_not be_empty
+        expect(responder.default_example_invocation).to_not be_nil
+        expect(responder.default_example_invocation).to_not be_empty
       end
     end
   end
@@ -399,11 +449,11 @@ describe Responder do
     it "should have the same number of each of them" do
       ResponderRegistry.available_responders.values.each do |responder_class|
         responder = responder_class.new({}, sample_params(responder_class))
-        if responder.description.is_a?(Array) || responder.example_invocation.is_a?(Array)
-          error_msg = "#{responder_class.name} descriptions and example_invocations sizes don't match"
-          expect(responder.description.is_a?(Array)).to eq(true), error_msg
-          expect(responder.example_invocation.is_a?(Array)).to eq(true), error_msg
-          expect(responder.description.size).to eq(responder.example_invocation.size), error_msg
+        if responder.default_description.is_a?(Array) || responder.default_example_invocation.is_a?(Array)
+          error_msg = "#{responder_class.name} descriptions and default_example_invocations sizes don't match"
+          expect(responder.default_description.is_a?(Array)).to eq(true), error_msg
+          expect(responder.default_example_invocation.is_a?(Array)).to eq(true), error_msg
+          expect(responder.default_description.size).to eq(responder.default_example_invocation.size), error_msg
         end
       end
     end

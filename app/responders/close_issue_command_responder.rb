@@ -8,7 +8,7 @@ class CloseIssueCommandResponder < Responder
     required_params :command
 
     @event_action = "issue_comment.created"
-    @event_regex = /\A@#{bot_name} #{command}\.?\s*\z/i
+    @event_regex = /\A@#{bot_name} #{command}\.?\s*$/i
   end
 
   def process_message(message)
@@ -16,11 +16,11 @@ class CloseIssueCommandResponder < Responder
     process_labeling
   end
 
-  def description
-    params[:description] || "Close the issue"
+  def default_description
+    "Close the issue"
   end
 
-  def example_invocation
+  def default_example_invocation
     "@#{bot_name} #{command}"
   end
 end

@@ -8,7 +8,7 @@ class ReviewerChecklistCommentResponder < Responder
     required_params :template_file
 
     @event_action = "issue_comment.created"
-    @event_regex = /\A@#{bot_name} #{command}\.?\s*\z/i
+    @event_regex = /\A@#{bot_name} #{command}\.?\s*$/i
   end
 
   def process_message(message)
@@ -33,7 +33,7 @@ class ReviewerChecklistCommentResponder < Responder
         "<!--checklist-for-#{k}-->\n#{mapping[k]}\n<!--end-checklist-for-#{k}-->"
       end
 
-      update_value("checklist-comments", "\n#{checklists.join('\n')}\n")
+      update_value("checklist-comments", "\n"+checklists.join("\n")+"\n")
     end
   end
 
@@ -45,7 +45,7 @@ class ReviewerChecklistCommentResponder < Responder
     mapping = {}
     reviewers.each do |rev|
       rev_login = rev.gsub("@", "")
-      checklink_link = read_value_from_body("checklist-for-rev_login")
+      checklink_link = read_value_from_body("checklist-for-#{rev_login}")
       mapping[rev_login] = checklink_link unless checklink_link.empty?
     end
     mapping
@@ -55,11 +55,11 @@ class ReviewerChecklistCommentResponder < Responder
     params[:command] || "generate my checklist"
   end
 
-  def description
+  def default_description
     "Adds a checklist for the reviewer using this command"
   end
 
-  def example_invocation
+  def default_example_invocation
     "@#{bot_name} #{command}"
   end
 end

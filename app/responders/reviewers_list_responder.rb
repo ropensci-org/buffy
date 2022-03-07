@@ -6,7 +6,7 @@ class ReviewersListResponder < Responder
 
   def define_listening
     @event_action = "issue_comment.created"
-    @event_regex = /\A@#{bot_name} (add|remove) (\S+) (to reviewers|from reviewers|as reviewer)\.?\s*\z/i
+    @event_regex = /\A@#{bot_name} (add|remove) (\S+) (to reviewers|from reviewers|as reviewer)\.?\s*$/i
   end
 
   def process_message(message)
@@ -84,12 +84,12 @@ class ReviewersListResponder < Responder
     username?(value) && params[:add_as_assignee] == true
   end
 
-  def description
+  def default_description
     ["Add to this issue's reviewers list",
      "Remove from this issue's reviewers list"]
   end
 
-  def example_invocation
+  def default_example_invocation
     ["@#{bot_name} add #{params[:sample_value] || '@username'} as reviewer",
      "@#{bot_name} remove #{params[:sample_value] || '@username'} from reviewers"]
   end

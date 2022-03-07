@@ -49,11 +49,11 @@ module Ropensci
       @list_of_reviewers ||= read_value_from_body("reviewers-list").split(",").map(&:strip)
     end
 
-    def description
+    def default_description
       "Approves a package. This command will close the issue."
     end
 
-    def example_invocation
+    def default_example_invocation
       "@#{@bot_name} approve package-name"
     end
   end

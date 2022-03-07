@@ -8,7 +8,7 @@ class ListOfValuesResponder < Responder
     required_params :name
 
     @event_action = "issue_comment.created"
-    @event_regex = /\A@#{bot_name} (add|remove) (\S+) (to|from) #{name}\.?\s*\z/i
+    @event_regex = /\A@#{bot_name} (add|remove) (\S+) (to|from) #{name}\.?\s*$/i
   end
 
   def process_message(message)
@@ -69,12 +69,12 @@ class ListOfValuesResponder < Responder
     username?(value) && params[:add_as_assignee] == true
   end
 
-  def description
+  def default_description
     ["Add to this issue's #{name} list",
      "Remove from this issue's #{name} list"]
   end
 
-  def example_invocation
+  def default_example_invocation
     ["@#{bot_name} add #{params[:sample_value] || 'xxxxx'} to #{name}",
      "@#{bot_name} remove #{params[:sample_value] || 'xxxxx'} from #{name}"]
   end

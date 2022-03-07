@@ -6,7 +6,7 @@ class RepoChecksResponder < Responder
 
   def define_listening
     @event_action = "issue_comment.created"
-    @event_regex = /\A@#{bot_name} check repository(?: from branch ([\w-]+))?\.?\s*\z/i
+    @event_regex = /\A@#{bot_name} check repository(?: from branch ([\/\w-]+))?\.?\s*$/i
   end
 
   def process_message(message)
@@ -17,13 +17,13 @@ class RepoChecksResponder < Responder
     end
   end
 
-  def description
+  def default_description
     "Perform checks on the repository" + "\n" +
     "# Optionally, it can be run on a non-default branch "
   end
 
-  def example_invocation
+  def default_example_invocation
     "@#{bot_name} check repository" + "\n" +
-    "@#{bot_name} check repository from custom-branch-name"
+    "@#{bot_name} check repository from branch custom-branch-name"
   end
 end

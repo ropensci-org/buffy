@@ -161,6 +161,7 @@ The _env_ section is used to declare general key/value settings. For security re
 :value_exists: *<String>* Responder will run only if there is a not empty value for this in the issue (marked with HTML comments).
 :value_matches: *<Hash>* Responder will run only if the param values (marked with HTML comments) in the body of the issue matches the ones specified here.
 :role_assigned: *<String>* Responder will be run only if there is a username assigned for the specified value.
+:labels: *<Array>* Responder will be run only if the issue is labeled with all the labels listed here.
 :reject_msg: *<String>* Optional. The response to send as comment if the conditions are not met
 ```
 
@@ -187,6 +188,42 @@ The _env_ section is used to declare general key/value settings. For security re
       if:
         value_matches:
           submission_type: astro
+
+    # This responder will run only if issue title includes '[REVIEW]' and
+    # the issue is labeled as 'accepted
+    start_review:
+      if:
+        title: "^\\[REVIEW\\]"
+        labels:
+          - accepted
+  ```
+  </dd>
+
+  <dt>description</dt>
+  <dd>Every responder has a default description to be shown using the help_responder. Use this param if you want to use a custom description.
+
+  Usage:
+
+  ```yaml
+    ...
+    custom_responder:
+      description: "This responder do something"
+    ...
+
+  ```
+  </dd>
+
+  <dt>example_invocation</dt>
+  <dd>Every responder defines an example string showing the command to invoke it, to be listed using the help_responder. Use this param if for some reason you want to use a custom value for the example invocation.
+
+  Usage:
+
+  ```yaml
+    ...
+    custom_responder:
+      example_invocation: "@botname run performance checks (please run this only on mondays)"
+    ...
+
   ```
   </dd>
 
@@ -216,6 +253,7 @@ A complete example:
         role_assigned: editor
       add_labels:
         - reviewers-assigned
+      description: "Use this command to assign a reviewers once the editor is assigned"
     hello:
       hidden: true
   ...
