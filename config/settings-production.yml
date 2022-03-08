@@ -107,7 +107,7 @@ buffy:
         - author1:
           - heading: Submitting Author
           - warn_if_empty: true
-        - reviewers
+        - reviewers-list
         - repourl:
           - heading: Repository
           - warn_if_empty: true
