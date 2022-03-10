@@ -92,6 +92,10 @@ buffy:
       name: editorcheck
       only:
         - editors
+      authorized_roles_in_issue:
+        - author1
+        - author-others
+        - reviewers-list
       command: check package
       description: Various package checks
       message: Thanks, about to send the query.
