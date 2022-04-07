@@ -7,7 +7,7 @@ module Ropensci
 
     def define_listening
       @event_action = "issue_comment.created"
-      @event_regex = /\A@#{bot_name} submit review (\S+) time ([\d.,:]+)+\s?(h|hour|hours)?\.?\s*\z/i
+      @event_regex = /\A@#{bot_name} submit review (\S+) time ([\d.,:]+|NA)+\s?(h|hour|hours)?\.?\s*\z/i
     end
 
     def process_message(message)

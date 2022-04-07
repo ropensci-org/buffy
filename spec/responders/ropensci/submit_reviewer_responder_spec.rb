@@ -56,6 +56,11 @@ describe Ropensci::SubmitReviewResponder do
       @responder.match_data = @responder.event_regex.match(msg)
       expect(@responder).to_not receive(:respond).with("Error: Invalid time format")
       @responder.process_message(msg)
+
+      msg = message_with("url", "NA")
+      @responder.match_data = @responder.event_regex.match(msg)
+      expect(@responder).to_not receive(:respond).with("Error: Invalid time format")
+      @responder.process_message(msg)
     end
 
     it "should verify url is valid" do
