@@ -73,6 +73,9 @@ buffy:
         - 3/reviewer(s)-assigned
       remove_labels:
         - 2/seeking-reviewer(s)
+      reminder:
+        days_before_deadline: 2
+        template_file: reminder.md
     assign_editor:
       message: "The editor guide can be found at https://devguide.ropensci.org/editorguide.html#editorchecklist"
       only:

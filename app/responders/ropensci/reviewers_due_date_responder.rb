@@ -46,6 +46,7 @@ module Ropensci
           process_labeling
           airtable_slack_invites(new_list)
         end
+        set_reminder
       end
     end
 
@@ -116,6 +117,21 @@ module Ropensci
     def due_date
       # Today + 21 days
       (Time.now + due_date_in_days_from_now * 86400).strftime("%Y-%m-%d")
+    end
+
+    def set_reminder
+      if params[:reminder]
+        days_before_deadline = params[:reminder][:days_before_deadline] || 4
+      else
+        days_before_deadline = 0
+      end
+
+      days_to_reminder = due_date_in_days_from_now - days_before_deadline
+
+      if days_to_reminder > 0 && days_to_reminder < due_date_in_days_from_now
+        reminder_at = Time.now + (days_to_reminder * 86400)
+        Ropensci::ReminderReviewDeadlineWorker.perform_async(reminder_at, locals, params[:reminder].merge({reviewer: reviewer}))
+      end
     end
 
     def due_date_in_days_from_now
