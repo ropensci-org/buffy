@@ -37,6 +37,15 @@ The body of the issue should have a couple of placeholders marked with HTML comm
 :add_as_assignee: *<Boolean>* Optional. If true, the new reviewer will be added as assignee to the issue. Default value is **false**.
 
 :add_as_collaborator: *<Boolean>* Optional. If true, the new reviewer it will be added as collaborator to the repo. Default value is **false**.
+
+:reminder: Used to configure automatic reminders. See next.
+```
+
+Automatic reminders: To configure an automatic reminder for the reviewers the `reminder` param can be used with two nested options under it:
+```eval_rst
+:days_before_deadline: *<Integer>* Optional. Configure when the reminder will be posted (how many days before the dealine for the review). Default value: **4**
+
+:template_file: The template file to use for the reminder (will receive variables: *reviewer*, *days_before_deadline* and *due_date*).
 ```
 
 For the **Airtable** connection to work two parameters must be present in the `env` section of the settings file, configured using environment variable:
@@ -58,7 +67,7 @@ For the **Airtable** connection to work two parameters must be present in the `e
 ...
 ```
 
-**With labeling, changing no_reviewer_text, limiting access and only if there's an editor already assigned:**
+**With labeling, changing no_reviewer_text, setting a reminder, limiting access and only if there's an editor already assigned:**
 ```yaml
 ...
   responders:
@@ -72,6 +81,9 @@ For the **Airtable** connection to work two parameters must be present in the `e
         - 3/reviewer(s)-assigned
       remove_labels:
         - 2/seeking-reviewer(s)
+      reminder:
+        days_before_deadline: 4
+        template_file: reminder.md
 ...
 ```
 
