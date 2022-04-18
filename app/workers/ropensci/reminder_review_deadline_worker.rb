@@ -24,11 +24,10 @@ module Ropensci
     def due_date_for(reviewer)
       @list_of_due_dates ||= read_value_from_body("due-dates-list").strip.split("\n").map(&:strip)
 
-      entry = @list_of_due_dates.select {|entry| entry.match?(/^Due date for #{reviewer}:/)}.first
+      entry = @list_of_due_dates.select {|entry| entry.match?(/^Due date for #{reviewer}: \d\d\d\d-\d\d-\d\d/)}.first
       return nil if entry.nil?
 
-      due_date_string = /^Due date for #{reviewer}: ([\d-]+)/.match(entry)[1]
-      return nil if due_date.nil?
+      due_date_string = /^Due date for #{reviewer}: (\d\d\d\d-\d\d-\d\d)/.match(entry)[1]
 
       Date.parse(due_date_string)
     end

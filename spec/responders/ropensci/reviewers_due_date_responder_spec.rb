@@ -1,5 +1,17 @@
 require_relative "../../spec_helper.rb"
 
+class DaysBeforeDate
+  def initialize(days_before, due_date_string)
+    @days_before = days_before
+    @due_date_string = due_date_string
+  end
+
+  def matches?(target)
+    @target = target
+    (@target + @days_before*86400).strftime("%Y-%m-%d").eql?(due_date_string)
+  end
+end
+
 describe Ropensci::ReviewersDueDateResponder do
 
   subject do
@@ -35,7 +47,7 @@ describe Ropensci::ReviewersDueDateResponder do
       @responder.context = OpenStruct.new(issue_id: 32,
                                           issue_author: "opener",
                                           repo: "openjournals/testing",
-                                          sender: "xuanxu")
+                                          sender: "editor")
     end
 
     describe "adding user as reviewer" do
@@ -134,6 +146,40 @@ describe Ropensci::ReviewersDueDateResponder do
         expect(@responder).to receive(:add_assignee)
         @responder.process_message(@msg)
       end
+
+      describe "automatic reminder" do
+        RSpec::Matchers.define :days_before_date do |days, dd|
+          match do |x|
+            (x + days*86400).strftime("%Y-%m-%d").eql?(dd)
+          end
+        end
+
+        before do
+          @responder.params[:reminder] = { days_before_deadline: 2, template_file: "reminder.md"}
+        end
+
+        it "should create a ReminderReviewDeadlineWorker with correct info" do
+          expected_locals = { bot_name: "ropensci-review-bot",
+                              issue_id: 32,
+                              match_data_1: "add",
+                              match_data_2: "@xuanxu",
+                              match_data_3: "to reviewers",
+                              repo: "openjournals/testing",
+                              sender: "editor",
+                              issue_author: "opener"}
+          expected_params = { days_before_deadline: 2, template_file: "reminder.md", reviewer: "@xuanxu"}
+
+          expect(Ropensci::ReminderReviewDeadlineWorker).to receive(:perform_async).with(days_before_date(2, @new_due_date), expected_locals, expected_params)
+          @responder.process_message(@msg)
+        end
+
+        it "should not be created if date in the past" do
+          @responder.params[:reminder] = { days_before_deadline: 33, template_file: "reminder.md"}
+
+          expect(Ropensci::ReminderReviewDeadlineWorker).to_not receive(:perform_async)
+          @responder.process_message(@msg)
+        end
+      end
     end
 
     describe "removing a reviewer" do
@@ -161,6 +207,11 @@ describe Ropensci::ReviewersDueDateResponder do
       it "should remove data from Airtable" do
         expect(@responder).to receive(:airtable_remove_reviewer)
         @responder.process_message('')
+      end
+
+      it "should not set reminder" do
+        expect(Ropensci::ReminderReviewDeadlineWorker).to_not receive(:perform_async)
+        @responder.process_message(@msg)
       end
 
       it "should not remove reviewer if not present in the list" do
