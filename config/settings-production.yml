@@ -113,6 +113,8 @@ buffy:
       message: Thanks, about to send the query.
       url: http://138.68.123.59:8000/editorcheck
       method: get
+      query_params:
+        secret: <%= ENV['PKGCHECK_TOKEN'] %>
       data_from_issue:
         - repo
         - repourl
