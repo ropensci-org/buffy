@@ -12,6 +12,8 @@ module Ropensci
         new_team
       when :finalize_transfer
         finalize_transfer
+      when :invite_author_to_transfered_repo
+        invite_author_to_transfered_repo
       end
     end
 
@@ -43,7 +45,7 @@ module Ropensci
           parameters = { permission: "admin" }
           response = Faraday.put(url, parameters.to_json, github_headers)
           if response.status.between?(200, 299)
-            respond("Transfer completed. The `#{params.package_name}` team is now owner of [the repository](https://github.com/#{org_team_name})")
+            respond("Transfer completed. \nThe `#{params.package_name}` team is now owner of [the repository](https://github.com/#{org_team_name}) and the author has been invited to the team")
           else
             respond("Could not finalize transfer: Could not add owner rights to the `#{params.package_name}` team")
           end
@@ -54,6 +56,21 @@ module Ropensci
         respond("Can't find repository `#{org_team_name}`, have you forgotten to transfer it first?")
       end
 
+    end
+
+    def invite_author_to_transfered_repo
+      org_team_name = "#{params.package_name}"
+      org_team_name = "ropensci/#{org_team_name}" unless org_team_name.start_with?("ropensci/")
+
+      if github_client.repository?(org_team_name)
+        if invite_user_to_team(params.package_author, org_team_name)
+          respond("Invitation sent!")
+        else
+          respond("Can't send invitation: There's not a `#{org_team_name}` team")
+        end
+      else
+        respond("Can't find repository `#{org_team_name}`, have you forgotten to transfer it first?")
+      end
     end
   end
 end
