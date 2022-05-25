@@ -25,7 +25,8 @@ module Ropensci
     end
 
     def finalize_transfer
-      org_team_name = "ropensci/#{params.package_name}"
+      org_team_name = "#{params.package_name}"
+      org_team_name = "ropensci/#{org_team_name}" unless org_team_name.start_with?("ropensci/")
 
       if github_client.repository?(org_team_name)
         package_team_id = api_team_id(org_team_name)
