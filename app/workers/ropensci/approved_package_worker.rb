@@ -22,7 +22,8 @@ module Ropensci
       team_name = params.team_name.to_s.strip
 
       unless user_to_invite.empty? || team_name.empty?
-        invite_user_to_team(user_to_invite, "ropensci/#{team_name}")
+        team_name = "ropensci/#{team_name}" unless team_name.start_with?("ropensci/")
+        invite_user_to_team(user_to_invite, team_name)
       end
     end
 
@@ -62,14 +63,10 @@ module Ropensci
       org_team_name = "#{params.package_name}"
       org_team_name = "ropensci/#{org_team_name}" unless org_team_name.start_with?("ropensci/")
 
-      if github_client.repository?(org_team_name)
-        if invite_user_to_team(params.package_author, org_team_name)
-          respond("Invitation sent!")
-        else
-          respond("Can't send invitation: There's not a `#{org_team_name}` team")
-        end
+      if invite_user_to_team(params.package_author, org_team_name)
+        respond("Invitation sent!")
       else
-        respond("Can't find repository `#{org_team_name}`, have you forgotten to transfer it first?")
+        respond("Can't send invitation: There's not a `#{org_team_name}` team")
       end
     end
   end

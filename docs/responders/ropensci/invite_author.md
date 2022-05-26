@@ -1,7 +1,7 @@
 ROpenSci :: Invite author
 =========================
 
-This responder is used by the author of an approved package to receive an invitation to join the team managing the new transfered package. Usually this invitation is sent automatically when the package is approved but it expires in a week. This responder allows the author to have the invitation sent again.
+This responder is used by the author of an approved package to receive an invitation to join the team that will manage the package and will allow them to transfer it to rOpenSci. Usually this invitation is sent automatically when the package is approved but it expires in a week. This responder allows the author to have the invitation sent again.
 
 ## Listens to
 
@@ -11,7 +11,7 @@ This responder is used by the author of an approved package to receive an invita
 
 ## Requirements
 
-The _ropensci/package-name_ team must exist and the _package-name_ must be a package already transfered to rOpenSci, otherwise an error message will be sent as reply.
+The command must be run by the author of the package (the user that created the review issue), otherwise an error message will be sent as reply.
 
 
 ## Settings key
@@ -20,10 +20,15 @@ The _ropensci/package-name_ team must exist and the _package-name_ must be a pac
 
 ## Example:
 
+Allow the command to run only if package is already approved:
+
 ```yaml
 ...
   responders:
     ropensci_invite_author:
+      if:
+        labels: 6/approved
+        reject_msg: "Can't invite author because the package is not approved yet"
 ...
 ```
 

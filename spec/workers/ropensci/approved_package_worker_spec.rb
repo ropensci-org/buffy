@@ -124,12 +124,6 @@ describe Ropensci::ApprovedPackageWorker do
       allow(@worker).to receive(:github_access_token).and_return("123ABC")
     end
 
-    it "should check for presence of the transfered repo" do
-      allow_any_instance_of(Octokit::Client).to receive(:repository?).with("ropensci/test-package").and_return(false)
-      expect(@worker).to receive(:respond).with("Can't find repository `ropensci/test-package`, have you forgotten to transfer it first?")
-      @worker.invite_author_to_transfered_repo
-    end
-
     it "should invite author to team" do
       allow_any_instance_of(Octokit::Client).to receive(:repository?).with("ropensci/test-package").and_return(true)
       expect(@worker).to receive(:invite_user_to_team).with("test-package_author", "ropensci/test-package").and_return(true)
