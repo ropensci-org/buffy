@@ -98,7 +98,7 @@ describe Ropensci::ApprovedPackageWorker do
       expect(@worker).to receive(:invite_user_to_team).with("test-package_author", "ropensci/test-package")
 
       expect(Faraday).to receive(:put).and_return(double(status: 200))
-      expected_response = "Transfer completed. The `test-package` team is now owner of [the repository](https://github.com/ropensci/test-package)"
+      expected_response = "Transfer completed. \nThe `test-package` team is now owner of [the repository](https://github.com/ropensci/test-package) and the author has been invited to the team"
       expect(@worker).to receive(:respond).with(expected_response)
       @worker.finalize_transfer
     end
@@ -112,6 +112,32 @@ describe Ropensci::ApprovedPackageWorker do
       expected_response = "Could not finalize transfer: Could not add owner rights to the `test-package` team"
       expect(@worker).to receive(:respond).with(expected_response)
       @worker.finalize_transfer
+    end
+  end
+
+  describe "#invite_author_to_transfered_repo" do
+    before do
+      @worker = described_class.new
+      @worker.context = {}
+      @worker.params = OpenStruct.new({ package_name: "test-package", package_author: "test-package_author" })
+      disable_github_calls_for(@worker)
+      allow(@worker).to receive(:github_access_token).and_return("123ABC")
+    end
+
+    it "should invite author to team" do
+      allow_any_instance_of(Octokit::Client).to receive(:repository?).with("ropensci/test-package").and_return(true)
+      expect(@worker).to receive(:invite_user_to_team).with("test-package_author", "ropensci/test-package").and_return(true)
+      expect(@worker).to receive(:respond).with("Invitation sent!")
+
+      @worker.invite_author_to_transfered_repo
+    end
+
+    it "should reply error message if can't create the team" do
+      allow_any_instance_of(Octokit::Client).to receive(:repository?).with("ropensci/test-package").and_return(true)
+      expect(@worker).to receive(:invite_user_to_team).with("test-package_author", "ropensci/test-package").and_return(false)
+
+      expect(@worker).to receive(:respond).with("Can't send invitation: There's not a `ropensci/test-package` team")
+      @worker.invite_author_to_transfered_repo
     end
   end
 end
