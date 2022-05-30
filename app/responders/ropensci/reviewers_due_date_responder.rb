@@ -130,7 +130,7 @@ module Ropensci
 
       if days_to_reminder > 0 && days_to_reminder < due_date_in_days_from_now
         reminder_at = Time.now + (days_to_reminder * 86400)
-        Ropensci::ReminderReviewDeadlineWorker.perform_async(reminder_at, locals, params[:reminder].merge({reviewer: reviewer}))
+        Ropensci::ReminderReviewDeadlineWorker.perform_at(reminder_at, locals, params[:reminder].merge({reviewer: reviewer}))
       end
     end
 

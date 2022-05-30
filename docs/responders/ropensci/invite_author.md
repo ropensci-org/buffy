@@ -34,4 +34,4 @@ Allow the command to run only if package is already approved:
 
 ## In action
 
-![](../../images/responders/ropensci/ropensci_invite_author.png "ROpenSci :: Invite author in action")
+![](../../images/responders/ropensci/ropensci_invite_author.png "ROpenSci :: Invite author responder in action")

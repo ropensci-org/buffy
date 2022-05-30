@@ -169,7 +169,7 @@ describe Ropensci::ReviewersDueDateResponder do
                               issue_author: "opener"}
           expected_params = { days_before_deadline: 2, template_file: "reminder.md", reviewer: "@xuanxu"}
 
-          expect(Ropensci::ReminderReviewDeadlineWorker).to receive(:perform_async).with(days_before_date(2, @new_due_date), expected_locals, expected_params)
+          expect(Ropensci::ReminderReviewDeadlineWorker).to receive(:perform_at).with(days_before_date(2, @new_due_date), expected_locals, expected_params)
           @responder.process_message(@msg)
         end
 
