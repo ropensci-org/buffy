@@ -84,6 +84,9 @@ buffy:
         - 1/editor-checks
       remove_labels:
         - 0/editorial-team-prep
+    ropensci_on_hold:
+      only: editors
+      on_hold_days: 90
     remove_editor:
       only:
         - editors
