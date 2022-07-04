@@ -94,7 +94,8 @@ describe Ropensci::ReviewersDueDateResponder do
                      "<!--submission-type-->Standard<!--end-submission-type-->"
         allow(@responder).to receive(:issue_body).and_return(issue_body)
 
-        expect(@responder).to receive(:respond).with("@xuanxu added to the reviewers list. Review due date is #{@new_due_date}. Thanks @xuanxu for accepting to review! Please refer to [our reviewer guide](https://devguide.ropensci.org/reviewerguide.html).")
+        expected_response = "@xuanxu added to the reviewers list. Review due date is #{@new_due_date}. Thanks @xuanxu for accepting to review! Please refer to [our reviewer guide](https://devguide.ropensci.org/reviewerguide.html).\n\nrOpenSci’s community is our best asset. We aim for reviews to be open, non-adversarial, and focused on improving software quality. Be respectful and kind! See our reviewers guide and [code of conduct](https://ropensci.org/code-of-conduct/) for more."
+        expect(@responder).to receive(:respond).with(expected_response)
         @responder.process_message(@msg)
       end
 
@@ -104,7 +105,8 @@ describe Ropensci::ReviewersDueDateResponder do
                      "<!--submission-type-->Estándar<!--end-submission-type-->"
         allow(@responder).to receive(:issue_body).and_return(issue_body)
 
-        expect(@responder).to receive(:respond).with("@xuanxu added to the reviewers list. Review due date is #{@new_due_date}. Thanks @xuanxu for accepting to review! Please refer to [our reviewer guide](https://devguide.ropensci.org/reviewerguide.html).")
+        expected_response = "@xuanxu added to the reviewers list. Review due date is #{@new_due_date}. Thanks @xuanxu for accepting to review! Please refer to [our reviewer guide](https://devguide.ropensci.org/reviewerguide.html).\n\nrOpenSci’s community is our best asset. We aim for reviews to be open, non-adversarial, and focused on improving software quality. Be respectful and kind! See our reviewers guide and [code of conduct](https://ropensci.org/code-of-conduct/) for more."
+        expect(@responder).to receive(:respond).with(expected_response)
         @responder.process_message(@msg)
       end
 
@@ -114,7 +116,8 @@ describe Ropensci::ReviewersDueDateResponder do
                      "<!--submission-type-->Stats<!--end-submission-type-->"
         allow(@responder).to receive(:issue_body).and_return(issue_body)
 
-        expect(@responder).to receive(:respond).with("@xuanxu added to the reviewers list. Review due date is #{@new_due_date}. Thanks @xuanxu for accepting to review! Please refer to [our reviewer guide](https://ropenscilabs.github.io/statistical-software-review-book/pkgreview.html).")
+        expected_response = "@xuanxu added to the reviewers list. Review due date is #{@new_due_date}. Thanks @xuanxu for accepting to review! Please refer to [our reviewer guide](https://ropenscilabs.github.io/statistical-software-review-book/pkgreview.html).\n\nrOpenSci’s community is our best asset. We aim for reviews to be open, non-adversarial, and focused on improving software quality. Be respectful and kind! See our reviewers guide and [code of conduct](https://ropensci.org/code-of-conduct/) for more."
+        expect(@responder).to receive(:respond).with(expected_response)
         @responder.process_message(@msg)
       end
 
