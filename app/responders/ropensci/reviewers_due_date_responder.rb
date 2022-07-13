@@ -130,7 +130,7 @@ module Ropensci
 
       if days_to_reminder > 0 && days_to_reminder < due_date_in_days_from_now
         reminder_at = Time.now + (days_to_reminder * 86400)
-        Ropensci::ReminderReviewDeadlineWorker.perform_async(reminder_at, locals, params[:reminder].merge({reviewer: reviewer}))
+        Ropensci::ReminderReviewDeadlineWorker.perform_at(reminder_at, locals, params[:reminder].merge({reviewer: reviewer}))
       end
     end
 
@@ -141,9 +141,9 @@ module Ropensci
     def respond_by_submission_type
       generic_en = "#{reviewer} added to the reviewers list. Review due date is #{due_date}. Thanks #{reviewer} for accepting to review!"
       replies = {
-        "standard" =>  "#{generic_en} Please refer to [our reviewer guide](https://devguide.ropensci.org/reviewerguide.html).",
-        "stats" => "#{generic_en} Please refer to [our reviewer guide](https://ropenscilabs.github.io/statistical-software-review-book/pkgreview.html).",
-        "estándar" => "#{generic_en} Please refer to [our reviewer guide](https://devguide.ropensci.org/reviewerguide.html).",
+        "standard" =>  "#{generic_en} Please refer to [our reviewer guide](https://devguide.ropensci.org/reviewerguide.html).\n\nrOpenSci’s community is our best asset. We aim for reviews to be open, non-adversarial, and focused on improving software quality. Be respectful and kind! See our reviewers guide and [code of conduct](https://ropensci.org/code-of-conduct/) for more.",
+        "stats" => "#{generic_en} Please refer to [our reviewer guide](https://ropenscilabs.github.io/statistical-software-review-book/pkgreview.html).\n\nrOpenSci’s community is our best asset. We aim for reviews to be open, non-adversarial, and focused on improving software quality. Be respectful and kind! See our reviewers guide and [code of conduct](https://ropensci.org/code-of-conduct/) for more.",
+        "estándar" => "#{generic_en} Please refer to [our reviewer guide](https://devguide.ropensci.org/reviewerguide.html).\n\nrOpenSci’s community is our best asset. We aim for reviews to be open, non-adversarial, and focused on improving software quality. Be respectful and kind! See our reviewers guide and [code of conduct](https://ropensci.org/code-of-conduct/) for more.",
       }
 
       submission_type = read_value_from_body("submission-type").downcase

@@ -18,7 +18,7 @@ describe Ropensci::FinalizeTransferResponder do
     end
 
     it "should define regex" do
-      expect(@responder.event_regex).to match("@ropensci-review-bot finalize transfer of")
+      expect(@responder.event_regex).to match("@ropensci-review-bot finalize transfer of package/name")
       expect(@responder.event_regex).to match("@ropensci-review-bot finalize transfer of package-name")
       expect(@responder.event_regex).to match("@ropensci-review-bot finalise transfer of package-name")
       expect(@responder.event_regex).to match("@ropensci-review-bot finalize transfer of package-name  \r\n")
@@ -39,7 +39,7 @@ describe Ropensci::FinalizeTransferResponder do
     end
 
     it "should verify presence of package name" do
-      msg = "@ropensci-review-bot finalize transfer of"
+      msg = "@ropensci-review-bot finalize transfer of "
       @responder.match_data = @responder.event_regex.match(msg)
       expect(@responder).to receive(:respond).with("Could not finalize transfer: Please, specify the name of the package (should match the name of the team at the rOpenSci org)")
       @responder.process_message(msg)

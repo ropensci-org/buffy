@@ -23,8 +23,6 @@ The bot must have owner rights.
 
 `ropensci_finalize_transfer`
 
-
-
 ## Example:
 
 ```yaml
