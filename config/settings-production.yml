@@ -103,7 +103,9 @@ buffy:
             - out-of-scope
           remove_labels:
             - 1/editor-checks
+
     external_service:
+
       name: editorcheck
       only:
         - editors
@@ -123,7 +125,7 @@ buffy:
         - repourl
         - issue_id
       template_file: goodpractice.md
-    external_service:
+
       name: srrcheck
       only:
         - editors
@@ -138,6 +140,7 @@ buffy:
         - repourl
         - issue_id
       silent: true
+
     initial_values:
       if:
         value_matches:
