@@ -104,40 +104,40 @@ buffy:
           remove_labels:
             - 1/editor-checks
 
-     external_service:
-       - editorcheck:
-           only:
-             - editors
-           authorized_roles_in_issue:
-             - author1
-             - author-others
-             - reviewers-list
-           command: check package
-           description: Various package checks
-           message: Thanks, about to send the query.
-           url: http://138.68.123.59:8000/editorcheck
-           method: get
-           query_params:
-             secret: <%= ENV['PKGCHECK_TOKEN'] %>
-           data_from_issue:
-             - repo
-             - repourl
-             - issue_id
+    external_service:
+      - editorcheck:
+          only:
+            - editors
+          authorized_roles_in_issue:
+            - author1
+            - author-others
+            - reviewers-list
+          command: check package
+          description: Various package checks
+          message: Thanks, about to send the query.
+          url: http://138.68.123.59:8000/editorcheck
+          method: get
+          query_params:
+            secret: <%= ENV['PKGCHECK_TOKEN'] %>
+            data_from_issue:
+              - repo
+              - repourl
+              - issue_id
            template_file: goodpractice.md
-       - srrcheck:
-           only:
-             - editors
-           command: check srr
-           description: Checks srr documentation for stats packages
-           url: http://138.68.123.59:8000/srrcheck
-           method: get
-           query_params:
-             secret: <%= ENV['PKGCHECK_TOKEN'] %>
-           data_from_issue:
-             - repo
-             - repourl
-             - issue_id
-           silent: true
+      - srrcheck:
+          only:
+            - editors
+          command: check srr
+          description: Checks srr documentation for stats packages
+          url: http://138.68.123.59:8000/srrcheck
+          method: get
+          query_params:
+            secret: <%= ENV['PKGCHECK_TOKEN'] %>
+            data_from_issue:
+              - repo
+              - repourl
+              - issue_id
+          silent: true
 
     initial_values:
       if:
