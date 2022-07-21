@@ -123,7 +123,7 @@ buffy:
               - repo
               - repourl
               - issue_id
-           template_file: goodpractice.md
+          template_file: goodpractice.md
       - srrcheck:
           only:
             - editors
