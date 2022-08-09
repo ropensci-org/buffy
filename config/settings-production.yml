@@ -119,10 +119,10 @@ buffy:
           method: get
           query_params:
             secret: <%= ENV['PKGCHECK_TOKEN'] %>
-            data_from_issue:
-              - repo
-              - repourl
-              - issue_id
+          data_from_issue:
+            - repo
+            - repourl
+            - issue_id
           template_file: goodpractice.md
       - srrcheck:
           only:
@@ -133,10 +133,10 @@ buffy:
           method: get
           query_params:
             secret: <%= ENV['PKGCHECK_TOKEN'] %>
-            data_from_issue:
-              - repo
-              - repourl
-              - issue_id
+          data_from_issue:
+            - repo
+            - repourl
+            - issue_id
           silent: true
 
     initial_values:
