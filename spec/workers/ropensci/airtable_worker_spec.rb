@@ -176,7 +176,8 @@ describe Ropensci::AirtableWorker do
                                         review_time: "9.5",
                                         review_date: Time.now.to_s,
                                         review_url: "review-url",
-                                        reviewers: "@reviewer21, @reviewer42"})
+                                        reviewers: "@reviewer21, @reviewer42",
+                                        package_repo: "https://ropensci.org/test-package" })
       @worker.airtable_config = {api_key: "ABC", base_id: "123"}
       @responder_config = OpenStruct.new({ label_when_all_reviews_in: "4/review-in-awaiting-changes",
                                            unlabel_when_all_reviews_in: "3/reviewer(s)-assigned" })
@@ -198,6 +199,7 @@ describe Ropensci::AirtableWorker do
         expect(review_in_airtable["review_url"]).to be_nil
         expect(review_in_airtable["review_hours"]).to be_nil
         expect(review_in_airtable["review_date"]).to be_nil
+        expect(review_in_airtable["package"]).to be_nil
 
         expect(review_in_airtable).to receive(:save)
 
@@ -206,6 +208,7 @@ describe Ropensci::AirtableWorker do
         expect(review_in_airtable["review_url"]).to eq("review-url")
         expect(review_in_airtable["review_hours"]).to eq("9.5")
         expect(review_in_airtable["review_date"]).to eq(Time.now.strftime("%Y-%m-%d"))
+        expect(review_in_airtable["package"]).to eq("https://ropensci.org/test-package")
       end
 
       it "should reply a success message" do

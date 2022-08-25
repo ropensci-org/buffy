@@ -75,6 +75,7 @@ module Ropensci
         review_entry["review_url"] = params.review_url
         review_entry["review_hours"] = params.review_time
         review_entry["review_date"] = Date.parse(params.review_date).strftime("%Y-%m-%d")
+        review_entry["package"] = params.package_repo
         review_entry.save
 
         respond("Logged review for _#{reviewer}_ (hours: #{params.review_time})")
