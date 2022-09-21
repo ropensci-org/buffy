@@ -23,7 +23,6 @@ module Ropensci
       add_to_or_remove_from = [add_or_remove, to_or_from].join(" ")
 
       if ["add to reviewers", "add as reviewer", "assign as reviewer", "assign to reviewers"].include?(add_to_or_remove_from)
-        add_reviewer
       elsif add_to_or_remove_from == "remove from reviewers"
         remove_reviewer
       else
@@ -142,7 +141,7 @@ module Ropensci
       generic_en = "#{reviewer} added to the reviewers list. Review due date is #{due_date}. Thanks #{reviewer} for accepting to review!"
       replies = {
         "standard" =>  "#{generic_en} Please refer to [our reviewer guide](https://devguide.ropensci.org/reviewerguide.html).\n\nrOpenSci’s community is our best asset. We aim for reviews to be open, non-adversarial, and focused on improving software quality. Be respectful and kind! See our reviewers guide and [code of conduct](https://ropensci.org/code-of-conduct/) for more.",
-        "stats" => "#{generic_en} Please refer to [our reviewer guide](https://ropenscilabs.github.io/statistical-software-review-book/pkgreview.html).\n\nrOpenSci’s community is our best asset. We aim for reviews to be open, non-adversarial, and focused on improving software quality. Be respectful and kind! See our reviewers guide and [code of conduct](https://ropensci.org/code-of-conduct/) for more.",
+        "stats" => "#{generic_en} Please refer to [our reviewer guide](https://stats-devguide.ropensci.org/pkgreview.html).\n\nrOpenSci’s community is our best asset. We aim for reviews to be open, non-adversarial, and focused on improving software quality. Be respectful and kind! See our reviewers guide and [code of conduct](https://ropensci.org/code-of-conduct/) for more.",
         "estándar" => "#{generic_en} Please refer to [our reviewer guide](https://devguide.ropensci.org/reviewerguide.html).\n\nrOpenSci’s community is our best asset. We aim for reviews to be open, non-adversarial, and focused on improving software quality. Be respectful and kind! See our reviewers guide and [code of conduct](https://ropensci.org/code-of-conduct/) for more.",
       }
 
