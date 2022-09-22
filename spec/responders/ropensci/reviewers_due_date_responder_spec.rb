@@ -116,7 +116,7 @@ describe Ropensci::ReviewersDueDateResponder do
                      "<!--submission-type-->Stats<!--end-submission-type-->"
         allow(@responder).to receive(:issue_body).and_return(issue_body)
 
-        expected_response = "@xuanxu added to the reviewers list. Review due date is #{@new_due_date}. Thanks @xuanxu for accepting to review! Please refer to [our reviewer guide](https://ropenscilabs.github.io/statistical-software-review-book/pkgreview.html).\n\nrOpenSci’s community is our best asset. We aim for reviews to be open, non-adversarial, and focused on improving software quality. Be respectful and kind! See our reviewers guide and [code of conduct](https://ropensci.org/code-of-conduct/) for more."
+        expected_response = "@xuanxu added to the reviewers list. Review due date is #{@new_due_date}. Thanks @xuanxu for accepting to review! Please refer to [our reviewer guide](https://stats-devguide.ropensci.org/pkgreview.html).\n\nrOpenSci’s community is our best asset. We aim for reviews to be open, non-adversarial, and focused on improving software quality. Be respectful and kind! See our reviewers guide and [code of conduct](https://ropensci.org/code-of-conduct/) for more."
         expect(@responder).to receive(:respond).with(expected_response)
         @responder.process_message(@msg)
       end
@@ -475,7 +475,7 @@ describe Ropensci::ReviewersDueDateResponder do
 
     it "replies link to statistical software reviewers guide if submission type is Stats" do
       allow(@responder).to receive(:read_value_from_body).with("submission-type").and_return("Stats")
-      expect(@responder).to receive(:respond).with(/ropenscilabs.github.io\/statistical-software-review-book\/pkgreview.html/)
+      expect(@responder).to receive(:respond).with(/stats-devguide.ropensci.org\/pkgreview.html/)
       @responder.respond_by_submission_type
     end
 
