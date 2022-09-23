@@ -1,4 +1,5 @@
 require "airrecord"
+require "date"
 
 module Ropensci
   class AirtableWorker < BuffyWorker
@@ -21,6 +22,8 @@ module Ropensci
         slack_invites
       when :clear_assignments
         clear_assignments
+      when :package_and_authors
+        package_and_authors
       end
     end
 
@@ -162,6 +165,29 @@ module Ropensci
       end
     end
 
+    def package_and_authors
+      author1_entry = airtable_authors.all(filter: "{github} = '#{params.author1}'").first ||
+                      airtable_authors.create(github: params.author1)
+
+      author_others_entries = []
+      params.author_others.each do |author_other|
+
+        author_others_entries << (airtable_authors.all(filter: "{github} = '#{author_other}'").first ||
+                                 airtable_authors.create(github: author_other))
+      end
+
+      package_entry = airtable_packages.all(filter: "{package-name} = '#{params.package_name}'").first
+      unless package_entry
+        airtable_packages.create("package-name" => params.package_name,
+                                 "submission-url" => params.submission_url,
+                                 "repo-url" => params.repo_url,
+                                 "submission-date" => Date.parse(params.submitted_at).strftime("%Y-%m-%d"),
+                                 "editor" => params.editor,
+                                 "author1" => [author1_entry.id],
+                                 "author-others" => author_others_entries.map(&:id))
+      end
+    end
+
     private
 
     def airtable_revs
@@ -174,6 +200,14 @@ module Ropensci
 
     def airtable_slack_invites
       @airtable_slack_invites_table ||= Airrecord.table(airtable_config[:api_key], airtable_config[:base_id], "slack-invites")
+    end
+
+    def airtable_authors
+      @airtable_authors_table ||= Airrecord.table(airtable_config[:api_key], airtable_config[:base_id], "authors")
+    end
+
+    def airtable_packages
+      @airtable_packages_table ||= Airrecord.table(airtable_config[:api_key], airtable_config[:base_id], "packages")
     end
 
     def name_or_github_login(gh_user)
