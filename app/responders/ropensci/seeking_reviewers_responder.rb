@@ -37,7 +37,6 @@ module Ropensci
         editor: editor,
         submitted_at: submitted_at
       }
-
     end
 
     def default_description
