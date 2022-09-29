@@ -1,7 +1,7 @@
 ROpenSci :: Reviewers & due date
 ================================
 
-This responder can be used to add/remove a user to/from the reviewers list in the body of the issue. It also sets a due date for the review and updates that info in the body of the issue and in the reply comment. This responder will also update Airtable adding entries to the reviewers and reviews tables.
+This responder can be used to add/remove a user to/from the reviewers list in the body of the issue. It also sets a due date for the review and updates that info in the body of the issue and in the reply comment. This responder will also update Airtable adding entries to the reviewers and reviews tables, and creating if still not present entries in the packages and authors tables.
 Allows [labeling](../../labeling), that will take effect when the second reviewer is assigned.
 
 ## Listens to
