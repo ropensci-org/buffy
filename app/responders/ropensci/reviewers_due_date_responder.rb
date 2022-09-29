@@ -47,6 +47,7 @@ module Ropensci
           airtable_slack_invites(new_list)
         end
         set_reminder
+        airtable_package_and_authors
       end
     end
 
@@ -90,6 +91,30 @@ module Ropensci
                                              params,
                                              locals,
                                              { reviewers: all_reviewers, author: user_login(author1), author_others: author_others, package_name: package_name })
+    end
+
+    def airtable_package_and_authors
+      author1 = user_login(read_value_from_body("author1"))
+      author_others = read_value_from_body("author-others").split(",").map(&:strip) - [""]
+      author_others = author_others.map {|ao| user_login(ao)}
+
+      submission_url = "https://github.com/#{locals[:repo]}/issues/#{locals[:issue_id]}"
+      repo_url = read_value_from_body("repourl")
+      package_name = (URI.parse(repo_url).path.split("/")-[""])[1]
+      editor = user_login(read_value_from_body("editor"))
+      submitted_at = context.raw_payload.dig("issue", "created_at")
+
+      records_data = {
+        author1: author1,
+        author_others: author_others,
+        submission_url: submission_url,
+        repo_url: repo_url,
+        package_name: package_name,
+        editor: editor,
+        submitted_at: submitted_at
+      }
+
+      Ropensci::AirtableWorker.perform_async(:package_and_authors, params, locals, records_data)
     end
 
     def reviewer

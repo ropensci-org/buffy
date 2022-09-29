@@ -35,6 +35,11 @@ describe Ropensci::AirtableWorker do
       @worker.perform(:clear_assignments, @config, @locals, {})
     end
 
+    it "should run package_and_authors action" do
+      expect(@worker).to receive(:package_and_authors)
+      @worker.perform(:package_and_authors, @config, @locals, {})
+    end
+
     it "should load airtable config and params" do
       @worker.perform(:action, @config, @locals, {})
       expect(@worker.airtable_config[:api_key]).to eq("ropensci_airtable_api_key_abcde")
@@ -405,6 +410,76 @@ describe Ropensci::AirtableWorker do
         expect(reviewer_entry_1).to_not receive(:save)
         expect(reviewer_entry_2).to_not receive(:save)
         @worker.clear_assignments
+      end
+    end
+  end
+
+  describe "#package_and_authors" do
+    before do
+      @worker = described_class.new
+      @worker.context = OpenStruct.new({repo: "testing/new_package", issue_id: "33"})
+      @worker.params = OpenStruct.new({
+        author1: "first_author",
+        author_others: ["second_author", "third_author"],
+        submission_url: "https://github.com/ropensci/test-submissions/issues/15",
+        repo_url: "https://github.com/ropensci-packages/great-package",
+        package_name: "great-package",
+        editor: "editor33",
+        submitted_at: "2021-09-06T11:08:23Z"
+      })
+      @worker.airtable_config = {api_key: "ABC", base_id: "123"}
+      disable_github_calls_for(@worker)
+    end
+
+    describe "connects with Airtable" do
+      let(:authors_table) { double(all: [], create: OpenStruct.new({github: "new_author", id: "3333"})) }
+      let(:packages_table) { double(all: [], create: OpenStruct.new({id: "package-id2345"})) }
+
+      before do
+        expect(Airrecord).to receive(:table).once.with("ABC", "123", "authors").and_return(authors_table)
+        expect(Airrecord).to receive(:table).once.with("ABC", "123", "packages").and_return(packages_table)
+      end
+
+      it "should find or create entry for author1" do
+        expect(authors_table).to receive(:all).with({filter: "{github} = 'first_author'"}).and_return([])
+        expect(authors_table).to receive(:create).with({github: "first_author"})
+
+        @worker.package_and_authors
+      end
+
+      it "should find or create entries for author_others" do
+        expect(authors_table).to receive(:all).with({filter: "{github} = 'second_author'"}).and_return([OpenStruct.new({github: "second_author", id: "2222"})])
+        expect(authors_table).to_not receive(:create).with({github: "second_author"})
+        expect(authors_table).to receive(:all).with({filter: "{github} = 'third_author'"}).and_return([])
+        expect(authors_table).to receive(:create).with({github: "third_author"})
+
+        @worker.package_and_authors
+      end
+
+      it "should create new package entry" do
+        expect(authors_table).to receive(:create).with({github: "first_author"}).and_return(OpenStruct.new({id: "111"}))
+        expect(authors_table).to receive(:create).with({github: "second_author"}).and_return(OpenStruct.new({id: "222"}))
+        expect(authors_table).to receive(:create).with({github: "third_author"}).and_return(OpenStruct.new({id: "333"}))
+
+        expect(packages_table).to receive(:all).with({filter: "{package-name} = 'great-package'"}).and_return([])
+        expect(packages_table).to receive(:create).with({
+                                                          "package-name" => "great-package",
+                                                          "submission-url" => "https://github.com/ropensci/test-submissions/issues/15",
+                                                          "repo-url" => "https://github.com/ropensci-packages/great-package",
+                                                          "submission-date" => "2021-09-06",
+                                                          "editor" => "editor33",
+                                                          "author1" => ["111"],
+                                                          "author-others" => ["222", "333"]
+                                                        })
+
+        @worker.package_and_authors
+      end
+
+      it "should not create package entry if already present" do
+        expect(packages_table).to receive(:all).with({filter: "{package-name} = 'great-package'"}).and_return([OpenStruct.new({"package-name" => "great-package", id: "12345"})])
+        expect(packages_table).to_not receive(:create)
+
+        @worker.package_and_authors
       end
     end
   end

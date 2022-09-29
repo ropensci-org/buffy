@@ -10,7 +10,6 @@ describe Ropensci::ApproveResponder do
     settings = { env: {bot_github_user: "ropensci-review-bot"} }
     params = { add_labels: ["approved!"], remove_labels: ["pending-approval!"] }
     @responder = subject.new(settings, params)
-
   end
 
   describe "listening" do

@@ -9,7 +9,6 @@ describe Ropensci::FinalizeTransferResponder do
   before do
     settings = { env: {bot_github_user: "ropensci-review-bot"} }
     @responder = subject.new(settings, {})
-
   end
 
   describe "listening" do
@@ -62,7 +61,5 @@ describe Ropensci::FinalizeTransferResponder do
 
       @responder.process_message(@msg)
     end
-
-
   end
 end

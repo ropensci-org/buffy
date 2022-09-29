@@ -47,7 +47,13 @@ describe Ropensci::ReviewersDueDateResponder do
       @responder.context = OpenStruct.new(issue_id: 32,
                                           issue_author: "opener",
                                           repo: "openjournals/testing",
-                                          sender: "editor")
+                                          sender: "editor",
+                                          issue_body: "Test Submission\n\n ... description ... \n\n" +
+                                                      "<!--author1-->@first_author<!--end-author1-->\n" +
+                                                      "<!--author-others-->@second_author, @third_author<!--end-author-others-->\n" +
+                                                      "<!--repourl-->https://github.com/ropensci-packages/great-package<!--end-repourl-->\n" +
+                                                      "Editor: <!--editor-->@editor33<!--end-editor-->",
+                                          raw_payload: { "issue" => {"created_at" => "2021-09-06T11:08:23Z"}})
     end
 
     describe "adding user as reviewer" do
@@ -85,6 +91,11 @@ describe Ropensci::ReviewersDueDateResponder do
 
       it "should add data to Airtable" do
         expect(@responder).to receive(:airtable_add_reviewer)
+        @responder.process_message('')
+      end
+
+      it "should add authors and package to Airtable" do
+        expect(@responder).to receive(:airtable_package_and_authors)
         @responder.process_message('')
       end
 
@@ -420,6 +431,42 @@ describe Ropensci::ReviewersDueDateResponder do
                                                                        expected_custom_params)
 
       @responder.airtable_slack_invites(["@rev1", "rev2"])
+    end
+  end
+
+  describe "#airtable_package_and_authors" do
+    before do
+      disable_github_calls_for(@responder)
+      @responder.context = OpenStruct.new(issue_id: 33,
+                                          issue_title: "Bioinfo package",
+                                          issue_author: "@uthor",
+                                          repo: "ropensci/testing",
+                                          sender: "xuanxu",
+                                          issue_body: "Test Submission\n\n ... description ... \n\n" +
+                                                      "<!--author1-->@first_author<!--end-author1-->\n" +
+                                                      "<!--author-others-->@second_author, @third_author<!--end-author-others-->\n" +
+                                                      "<!--repourl-->https://github.com/ropensci-packages/bioinfo-package<!--end-repourl-->\n" +
+                                                      "Editor: <!--editor-->@editor33<!--end-editor-->",
+                                          raw_payload: { "issue" => {"created_at" => "2021-09-06T11:08:23Z"}})
+    end
+
+    it "should create an AirtableWorker job to add entries to authors and packages" do
+      expected_custom_params = {
+        author1: "first_author",
+        author_others: ["second_author", "third_author"],
+        submission_url: "https://github.com/ropensci/testing/issues/33",
+        repo_url: "https://github.com/ropensci-packages/bioinfo-package",
+        package_name: "bioinfo-package",
+        editor: "editor33",
+        submitted_at: "2021-09-06T11:08:23Z"
+      }
+
+      expect(Ropensci::AirtableWorker).to receive(:perform_async).with(:package_and_authors,
+                                                                       @responder.params,
+                                                                       @responder.locals,
+                                                                       expected_custom_params)
+
+      @responder.airtable_package_and_authors
     end
   end
 
