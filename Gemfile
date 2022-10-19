@@ -5,13 +5,14 @@ if ENV["CUSTOM_RUBY_VERSION"]
 end
 
 gem 'octokit'
-gem 'sinatra', '2.2.2'
-gem 'sinatra-contrib', '2.2.2'
+gem 'sinatra', '3.0.1'
+gem 'sinatra-contrib', '3.0.1'
 gem 'openssl'
 gem 'puma'
 gem 'sidekiq'
 gem 'bibtex-ruby'
 gem 'faraday'
+gem 'faraday-retry'
 gem 'serrano'
 gem 'rexml'
 gem 'github-linguist'
