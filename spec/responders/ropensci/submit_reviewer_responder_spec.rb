@@ -35,7 +35,8 @@ describe Ropensci::SubmitReviewResponder do
 
   describe "#process_message" do
     before do
-      @issue_body = "... <!--reviewers-list-->@reviewer1, @reviewer2<!--end-reviewers-list--> ..."
+      @issue_body = "... <!--reviewers-list-->@reviewer1, @reviewer2<!--end-reviewers-list--> ..." +
+                    "<!--repourl-->https://github.com/scientific/test-software<!--end-repourl-->"
       @valid_comment_url = "https://github.com/ropensci/testing/issues/32#issuecomment-12345678"
 
       disable_github_calls_for(@responder)
@@ -90,9 +91,22 @@ describe Ropensci::SubmitReviewResponder do
       msg = message_with(@valid_comment_url, "10.5 hours")
       comment_created_at = Time.now
       comment = double(created_at: comment_created_at, user: double(login: "reviewer1"))
-      expected_params = {all_reviews_label: "4/review-in-awaiting-changes"}
-      expected_locals = {bot_name: "ropensci-review-bot", issue_author: "opener", issue_id: 32, repo: "ropensci/testing", sender: "xuanxu", match_data_1: @valid_comment_url, match_data_2: "10.5", match_data_3: "hours"}
-      expected_review_data = { reviewer: "reviewer1", review_date: comment_created_at, review_time: "10.5", review_url: @valid_comment_url, reviewers: "@reviewer1, @reviewer2" }
+      expected_params = { all_reviews_label: "4/review-in-awaiting-changes" }
+      expected_locals = { bot_name: "ropensci-review-bot",
+                          issue_author: "opener",
+                          issue_id: 32, repo: "ropensci/testing",
+                          sender: "xuanxu",
+                          match_data_1: @valid_comment_url,
+                          match_data_2: "10.5",
+                          match_data_3: "hours"
+                        }
+      expected_review_data = { reviewer: "reviewer1",
+                               review_date: comment_created_at,
+                               review_time: "10.5",
+                               review_url: @valid_comment_url,
+                               reviewers: "@reviewer1, @reviewer2",
+                               package_name: "test-software"
+                             }
 
       @responder.match_data = @responder.event_regex.match(msg)
       expect(Ropensci::AirtableWorker).to receive(:perform_async).with(:submit_review,

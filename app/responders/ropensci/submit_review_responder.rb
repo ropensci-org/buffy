@@ -34,11 +34,19 @@ module Ropensci
       end
 
       reviewers = read_value_from_body("reviewers-list")
+      repo_url = read_value_from_body("repourl")
+      package_name = (URI.parse(repo_url).path.split("/")-[""])[1]
 
       comment_date = comment.created_at
       reviewer = comment.user.login
 
-      review_data = { reviewer: reviewer, review_date: comment_date, review_time: review_time, review_url: review_url, reviewers: reviewers }
+      review_data = { reviewer: reviewer,
+                      review_date: comment_date,
+                      review_time: review_time,
+                      review_url: review_url,
+                      reviewers: reviewers,
+                      package_name: package_name
+                    }
       Ropensci::AirtableWorker.perform_async(:submit_review, params, locals, review_data)
     end
 
