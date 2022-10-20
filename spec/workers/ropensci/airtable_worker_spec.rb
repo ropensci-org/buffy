@@ -191,6 +191,7 @@ describe Ropensci::AirtableWorker do
     describe "connects with Airtable" do
       let(:review_in_airtable) { OpenStruct.new({github: "reviewer21", save: true}) }
       let(:reviews_table) { double(all: [review_in_airtable], update: [review_in_airtable]) }
+      let(:packages_table) { double(all: [OpenStruct.new({id: 33})]) }
 
       before do
         expect(Airrecord).to receive(:table).once.with("ABC", "123", "reviews").and_return(reviews_table)
@@ -199,6 +200,7 @@ describe Ropensci::AirtableWorker do
       it "should update reviewer's review" do
         expected_airtable_query = "AND({github} = 'reviewer21', {id_no} = '33')"
         expect(reviews_table).to receive(:all).with({filter: expected_airtable_query}).and_return([review_in_airtable])
+        expect(Airrecord).to receive(:table).once.with("ABC", "123", "packages").and_return(packages_table)
 
         expect(review_in_airtable["review_url"]).to be_nil
         expect(review_in_airtable["review_hours"]).to be_nil
@@ -211,9 +213,11 @@ describe Ropensci::AirtableWorker do
         expect(review_in_airtable["review_url"]).to eq("review-url")
         expect(review_in_airtable["review_hours"]).to eq("9.5")
         expect(review_in_airtable["review_date"]).to eq(Time.now.strftime("%Y-%m-%d"))
+        expect(review_in_airtable["packages"]).to eq([33])
       end
 
       it "should reply a success message" do
+        expect(Airrecord).to receive(:table).once.with("ABC", "123", "packages").and_return(packages_table)
         expect(@worker).to receive(:respond).with("Logged review for _reviewer21_ (hours: 9.5)")
         @worker.submit_review({})
       end
@@ -221,6 +225,7 @@ describe Ropensci::AirtableWorker do
       it "should reply a warning message if no review entry" do
         expected_airtable_query = "AND({github} = 'reviewer21', {id_no} = '33')"
         expect(reviews_table).to receive(:all).with({filter: expected_airtable_query}).and_return([])
+        expect(Airrecord).to_not receive(:table).with("ABC", "123", "packages")
 
         expect(@worker).to receive(:respond).with("Couldn't find entry for _reviewer21_ in the reviews log")
         @worker.submit_review({})
@@ -229,6 +234,7 @@ describe Ropensci::AirtableWorker do
       it "should update label when number of reviews and reviewers is the same" do
         reviewer_query = "AND({github} = 'reviewer21', {id_no} = '33')"
         expect(reviews_table).to receive(:all).with({filter: reviewer_query}).and_return([review_in_airtable])
+        expect(Airrecord).to receive(:table).once.with("ABC", "123", "packages").and_return(packages_table)
 
         expected_airtable_query = "AND(OR({github} = 'reviewer21', {github} = 'reviewer42'), {id_no} = '33')"
         review_21 = { "review_url" => "review-url-21" }
@@ -243,6 +249,7 @@ describe Ropensci::AirtableWorker do
       it "should not update label if pending reviews" do
         reviewer_query = "AND({github} = 'reviewer21', {id_no} = '33')"
         expect(reviews_table).to receive(:all).with({filter: reviewer_query}).and_return([review_in_airtable])
+        expect(Airrecord).to receive(:table).once.with("ABC", "123", "packages").and_return(packages_table)
 
         expected_airtable_query = "AND(OR({github} = 'reviewer21', {github} = 'reviewer42'), {id_no} = '33')"
         review_21 = { "review_url" => "review-url-21" }
@@ -257,6 +264,7 @@ describe Ropensci::AirtableWorker do
       it "should update labels only if labels params exists" do
         reviewer_query = "AND({github} = 'reviewer21', {id_no} = '33')"
         expect(reviews_table).to receive(:all).with({filter: reviewer_query}).and_return([review_in_airtable])
+        expect(Airrecord).to receive(:table).once.with("ABC", "123", "packages").and_return(packages_table)
 
         expected_airtable_query = "AND(OR({github} = 'reviewer21', {github} = 'reviewer42'), {id_no} = '33')"
         expect(reviews_table).to_not receive(:all).with({filter: expected_airtable_query})

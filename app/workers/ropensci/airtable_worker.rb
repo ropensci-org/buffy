@@ -75,9 +75,12 @@ module Ropensci
       reviewer = user_login(params.reviewer.to_s)
       review_entry = airtable_reviews.all(filter: "AND({github} = '#{reviewer}', {id_no} = '#{context.issue_id}')").first
       if review_entry
+        package_entry = airtable_packages.all(filter: "{package-name} = '#{params.package_name}'").first
+
         review_entry["review_url"] = params.review_url
         review_entry["review_hours"] = params.review_time
         review_entry["review_date"] = Date.parse(params.review_date).strftime("%Y-%m-%d")
+        review_entry["packages"] = [package_entry.id] if package_entry
         review_entry.save
 
         respond("Logged review for _#{reviewer}_ (hours: #{params.review_time})")
