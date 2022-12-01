@@ -335,21 +335,21 @@ describe Ropensci::ReviewersDueDateResponder do
                                           repo: "openjournals/testing",
                                           sender: "xuanxu")
       allow(@responder).to receive(:reviewer).and_return("@reviewer_21")
-      @expected_params = { no_reviewer_text: "TBD" }
-      @expected_locals = { bot_name: "ropensci-review-bot",
-                           issue_id: 33,
-                           repo: "openjournals/testing",
-                           sender: "xuanxu",
-                           issue_author: "@uthor"}
+      @expected_params = { "no_reviewer_text" => "TBD" }
+      @expected_locals = { "bot_name" => "ropensci-review-bot",
+                           "issue_id" => 33,
+                           "repo" => "openjournals/testing",
+                           "sender" => "xuanxu",
+                           "issue_author" => "@uthor"}
     end
 
     it "should pass title to the AirtableWorker when there is no package-name" do
-      expected_custom_params = { reviewer: "@reviewer_21", package_name: "Bioinfo package" }
+      expected_custom_params = { "reviewer" => "@reviewer_21", "package_name" => "Bioinfo package" }
 
       issue_body = "...Package: <!--package-name--><!--end-package-name--> ..."
       allow(@responder).to receive(:issue_body).and_return(issue_body)
 
-      expect(Ropensci::AirtableWorker).to receive(:perform_async).with(:assign_reviewer,
+      expect(Ropensci::AirtableWorker).to receive(:perform_async).with("assign_reviewer",
                                                                        @expected_params,
                                                                        @expected_locals,
                                                                        expected_custom_params)
@@ -358,12 +358,12 @@ describe Ropensci::ReviewersDueDateResponder do
     end
 
     it "should pass package-name to the AirtableWorker" do
-      expected_custom_params = { reviewer: "@reviewer_21", package_name: "Superpackage!" }
+      expected_custom_params = { "reviewer" => "@reviewer_21", "package_name" => "Superpackage!" }
 
       issue_body = "...Package: <!--package-name-->Superpackage!<!--end-package-name--> ..."
       allow(@responder).to receive(:issue_body).and_return(issue_body)
 
-      expect(Ropensci::AirtableWorker).to receive(:perform_async).with(:assign_reviewer,
+      expect(Ropensci::AirtableWorker).to receive(:perform_async).with("assign_reviewer",
                                                                        @expected_params,
                                                                        @expected_locals,
                                                                        expected_custom_params)
@@ -381,17 +381,17 @@ describe Ropensci::ReviewersDueDateResponder do
                                           repo: "openjournals/testing",
                                           sender: "xuanxu")
       allow(@responder).to receive(:reviewer).and_return("@reviewer_21")
-      @expected_params = { no_reviewer_text: "TBD" }
-      @expected_locals = { bot_name: "ropensci-review-bot",
-                           issue_id: 33,
-                           repo: "openjournals/testing",
-                           sender: "xuanxu",
-                           issue_author: "@uthor"}
+      @expected_params = { "no_reviewer_text" => "TBD" }
+      @expected_locals = { "bot_name" => "ropensci-review-bot",
+                           "issue_id" => 33,
+                           "repo" => "openjournals/testing",
+                           "sender" => "xuanxu",
+                           "issue_author" => "@uthor"}
     end
 
     it "should create an AirtableWorker job to remove reviewer" do
-      expected_custom_params = { reviewer: "@reviewer_21" }
-      expect(Ropensci::AirtableWorker).to receive(:perform_async).with(:remove_reviewer,
+      expected_custom_params = { "reviewer" => "@reviewer_21" }
+      expect(Ropensci::AirtableWorker).to receive(:perform_async).with("remove_reviewer",
                                                                        @expected_params,
                                                                        @expected_locals,
                                                                        expected_custom_params)
@@ -409,23 +409,23 @@ describe Ropensci::ReviewersDueDateResponder do
                                           repo: "openjournals/testing",
                                           sender: "xuanxu")
       allow(@responder).to receive(:reviewer).and_return("@reviewer_21")
-      @expected_params = { no_reviewer_text: "TBD" }
-      @expected_locals = { bot_name: "ropensci-review-bot",
-                           issue_id: 33,
-                           repo: "openjournals/testing",
-                           sender: "xuanxu",
-                           issue_author: "@uthor"}
+      @expected_params = { "no_reviewer_text" => "TBD" }
+      @expected_locals = { "bot_name" => "ropensci-review-bot",
+                           "issue_id" => 33,
+                           "repo" => "openjournals/testing",
+                           "sender" => "xuanxu",
+                           "issue_author" => "@uthor"}
     end
 
     it "should create an AirtableWorker job to add entries to slack_invites" do
-      expected_custom_params = { reviewers: ["rev1", "rev2"], author: "author", author_others: ["other"], package_name: "Bioinfo package" }
+      expected_custom_params = { "reviewers" => ["rev1", "rev2"], "author" => "author", "author_others" => ["other"], "package_name" => "Bioinfo package" }
 
       issue_body = "...Package: <!--package-name--><!--end-package-name--> ..." +
                    ".. First author: <!--author1-->@author<!--end-author1--> ..." +
                    ".. Other authors: <!--author-others-->@other<!--end-author-others--> ..."
 
       allow(@responder).to receive(:issue_body).and_return(issue_body)
-      expect(Ropensci::AirtableWorker).to receive(:perform_async).with(:slack_invites,
+      expect(Ropensci::AirtableWorker).to receive(:perform_async).with("slack_invites",
                                                                        @expected_params,
                                                                        @expected_locals,
                                                                        expected_custom_params)
@@ -452,18 +452,18 @@ describe Ropensci::ReviewersDueDateResponder do
 
     it "should create an AirtableWorker job to add entries to authors and packages" do
       expected_custom_params = {
-        author1: "first_author",
-        author_others: ["second_author", "third_author"],
-        submission_url: "https://github.com/ropensci/testing/issues/33",
-        repo_url: "https://github.com/ropensci-packages/bioinfo-package",
-        package_name: "bioinfo-package",
-        editor: "editor33",
-        submitted_at: "2021-09-06T11:08:23Z"
+        "author1" => "first_author",
+        "author_others" => ["second_author", "third_author"],
+        "submission_url" => "https://github.com/ropensci/testing/issues/33",
+        "repo_url" => "https://github.com/ropensci-packages/bioinfo-package",
+        "package_name" => "bioinfo-package",
+        "editor" => "editor33",
+        "submitted_at" => "2021-09-06T11:08:23Z"
       }
 
-      expect(Ropensci::AirtableWorker).to receive(:perform_async).with(:package_and_authors,
-                                                                       @responder.params,
-                                                                       @responder.locals,
+      expect(Ropensci::AirtableWorker).to receive(:perform_async).with("package_and_authors",
+                                                                       @responder.params.transform_keys(&:to_s),
+                                                                       @responder.locals.transform_keys(&:to_s),
                                                                        expected_custom_params)
 
       @responder.airtable_package_and_authors

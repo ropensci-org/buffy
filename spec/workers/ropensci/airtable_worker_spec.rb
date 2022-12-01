@@ -12,42 +12,42 @@ describe Ropensci::AirtableWorker do
 
     it "should run assign_reviewer action" do
       expect(@worker).to receive(:assign_reviewer)
-      @worker.perform(:assign_reviewer, @config, @locals, {})
+      @worker.perform("assign_reviewer", @config, @locals, {})
     end
 
     it "should run remove_reviewer action" do
       expect(@worker).to receive(:remove_reviewer)
-      @worker.perform(:remove_reviewer, @config, @locals, {})
+      @worker.perform("remove_reviewer", @config, @locals, {})
     end
 
     it "should run submit_review action" do
       expect(@worker).to receive(:submit_review).with(@config)
-      @worker.perform(:submit_review, @config, @locals, {})
+      @worker.perform("submit_review", @config, @locals, {})
     end
 
     it "should run slack_invites action" do
       expect(@worker).to receive(:slack_invites)
-      @worker.perform(:slack_invites, @config, @locals, {})
+      @worker.perform("slack_invites", @config, @locals, {})
     end
 
     it "should run clear_assignments action" do
       expect(@worker).to receive(:clear_assignments)
-      @worker.perform(:clear_assignments, @config, @locals, {})
+      @worker.perform("clear_assignments", @config, @locals, {})
     end
 
     it "should run package_and_authors action" do
       expect(@worker).to receive(:package_and_authors)
-      @worker.perform(:package_and_authors, @config, @locals, {})
+      @worker.perform("package_and_authors", @config, @locals, {})
     end
 
     it "should load airtable config and params" do
-      @worker.perform(:action, @config, @locals, {})
+      @worker.perform("action", @config, @locals, {})
       expect(@worker.airtable_config[:api_key]).to eq("ropensci_airtable_api_key_abcde")
       expect(@worker.airtable_config[:base_id]).to eq("ropensci_airtable_base_id_12345")
     end
 
     it "should load params" do
-      @worker.perform(:action, @config, @locals, { reviewer: "tester", package_name: "A" })
+      @worker.perform("action", @config, @locals, { reviewer: "tester", package_name: "A" })
       expect(@worker.params.reviewer).to eq("tester")
       expect(@worker.params.package_name).to eq("A")
     end

@@ -13,7 +13,7 @@ module Ropensci
 
     def process_message(message)
       respond_external_template(params[:template_file], locals) if params[:template_file]
-      Ropensci::AirtableWorker.perform_async(:package_and_authors, params, locals, records_data)
+      Ropensci::AirtableWorker.perform_async("package_and_authors", serializable(params), serializable(locals), serializable(records_data))
       process_labeling
     end
 

@@ -72,10 +72,10 @@ describe Ropensci::ApproveResponder do
 
     it "should create an AirtableWorker job" do
       expect(Ropensci::AirtableWorker).to receive(:perform_async).
-                                          with(:clear_assignments,
-                                               @responder.params,
-                                               @responder.locals,
-                                               { reviewers: ["@maelle", "@mpadge"] })
+                                          with("clear_assignments",
+                                               @responder.params.transform_keys(&:to_s),
+                                               @responder.locals.transform_keys(&:to_s),
+                                               { "reviewers" => ["@maelle", "@mpadge"] })
 
       allow(@responder).to receive(:issue_body).and_return(@issue_body)
       @responder.process_message(@msg)
@@ -92,10 +92,10 @@ describe Ropensci::ApproveResponder do
 
     it "should create a job to create new team" do
       expect(Ropensci::ApprovedPackageWorker).to receive(:perform_async).
-                                                 with(:new_team,
-                                                      @responder.params,
-                                                      @responder.locals,
-                                                      { team_name: "great-package" })
+                                                 with("new_team",
+                                                      @responder.params.transform_keys(&:to_s),
+                                                      @responder.locals.transform_keys(&:to_s),
+                                                      { "team_name" => "great-package" })
 
       allow(@responder).to receive(:issue_body).and_return(@issue_body)
       @responder.process_message(@msg)
@@ -118,9 +118,9 @@ describe Ropensci::ApproveResponder do
         allow(@responder).to receive(:issue_body).and_return(@issue_body)
         expect(@responder).to_not receive(:respond).with("Please add a grade (bronze/silver/gold) before approval.")
         expect(Ropensci::StatsGradesWorker).to receive(:perform_async).
-                                                 with(:label,
+                                                 with("label",
                                                       @responder.locals,
-                                                      { stats_badge_url: nil})
+                                                      { "stats_badge_url" => nil})
 
         @responder.process_message(@msg)
       end
@@ -131,9 +131,9 @@ describe Ropensci::ApproveResponder do
         @responder.params[:stats_badge_url] = "http://ropensci.test/stats_badges:8000"
         expect(@responder).to_not receive(:respond).with("Please add a grade (bronze/silver/gold) before approval.")
         expect(Ropensci::StatsGradesWorker).to receive(:perform_async).
-                                                 with(:label,
+                                                 with("label",
                                                       @responder.locals,
-                                                      { stats_badge_url: "http://ropensci.test/stats_badges:8000"})
+                                                      { "stats_badge_url" => "http://ropensci.test/stats_badges:8000"})
 
         @responder.process_message(@msg)
       end

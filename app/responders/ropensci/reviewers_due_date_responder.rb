@@ -69,14 +69,14 @@ module Ropensci
     def airtable_add_reviewer
       package_name = read_value_from_body("package-name")
       package_name = context.issue_title if package_name.empty?
-      Ropensci::AirtableWorker.perform_async(:assign_reviewer,
-                                             params,
-                                             locals,
-                                             { reviewer: reviewer, package_name: package_name })
+      Ropensci::AirtableWorker.perform_async("assign_reviewer",
+                                             serializable(params),
+                                             serializable(locals),
+                                             { "reviewer" => reviewer, "package_name" => package_name })
     end
 
     def airtable_remove_reviewer
-      Ropensci::AirtableWorker.perform_async(:remove_reviewer, params, locals, { reviewer: reviewer })
+      Ropensci::AirtableWorker.perform_async("remove_reviewer", serializable(params), serializable(locals), { "reviewer" => reviewer })
     end
 
     def airtable_slack_invites(all_reviewers)
@@ -87,10 +87,10 @@ module Ropensci
       author_others = author_others.map {|a| user_login(a)}
       package_name = read_value_from_body("package-name")
       package_name = context.issue_title if package_name.empty?
-      Ropensci::AirtableWorker.perform_async(:slack_invites,
-                                             params,
-                                             locals,
-                                             { reviewers: all_reviewers, author: user_login(author1), author_others: author_others, package_name: package_name })
+      Ropensci::AirtableWorker.perform_async("slack_invites",
+                                             serializable(params),
+                                             serializable(locals),
+                                             { "reviewers" => all_reviewers, "author" => user_login(author1), "author_others" => author_others, "package_name" => package_name })
     end
 
     def airtable_package_and_authors
@@ -114,7 +114,7 @@ module Ropensci
         submitted_at: submitted_at
       }
 
-      Ropensci::AirtableWorker.perform_async(:package_and_authors, params, locals, records_data)
+      Ropensci::AirtableWorker.perform_async("package_and_authors", serializable(params), serializable(locals), serializable(records_data))
     end
 
     def reviewer
