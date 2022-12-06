@@ -40,6 +40,17 @@ buffy:
           description: Show our Code of Conduct
           messages:
             - "Our Code of Conduct can be found at https://ropensci.org/code-of-conduct/"
+      - check_readme:
+        command: check readme
+        description: Checks peer-review badge is in README.md
+        external_call:
+          name: badge
+          url: http://138.68.123.59:8000/badge
+          method: get
+          data_from_issue:
+            - repo
+            - repourl
+            - issue_id
     ropensci_seeking_reviewers:
       only:
         - editors
@@ -50,6 +61,14 @@ buffy:
         - 2/seeking-reviewer(s)
     ropensci_approve:
       only: editors
+      external_service:
+        name: badge
+        url: http://138.68.123.59:8000/badge
+        method: get
+        data_from_issue:
+          - repo
+          - repourl
+          - issue_id
       template_file: approved.md
       data_from_issue:
         - reviewers-list
