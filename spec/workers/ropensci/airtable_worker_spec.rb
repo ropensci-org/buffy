@@ -26,6 +26,11 @@ describe Ropensci::AirtableWorker do
       @worker.perform("submit_review", @config, @locals, {})
     end
 
+    it "should run submit_author_response action" do
+      expect(@worker).to receive(:submit_author_response)
+      @worker.perform("submit_author_response", @config, @locals, {})
+    end
+
     it "should run slack_invites action" do
       expect(@worker).to receive(:slack_invites)
       @worker.perform("slack_invites", @config, @locals, {})
@@ -284,6 +289,62 @@ describe Ropensci::AirtableWorker do
         expect(@worker).to_not receive(:label_issue)
         expect(@worker).to_not receive(:unlabel_issue)
         @worker.submit_review({ label_when_all_reviews_in: "", unlabel_when_all_reviews_in: nil })
+      end
+    end
+  end
+
+  describe "#submit_author_response" do
+    before do
+      @worker = described_class.new
+      @worker.context = OpenStruct.new({repo: "testing/new_package", issue_id: "42"})
+      @worker.params = OpenStruct.new({ author_response_id: "great-package 123456789",
+                                        author_response_url: "https://github.com/ropensci/testing/issues/32#issuecomment-123456789",
+                                        submitting_date: Time.now.strftime("%Y-%m-%d"),
+                                        package_name: "great-package" })
+      @worker.airtable_config = {api_key: "ABC", base_id: "123"}
+
+      disable_github_calls_for(@worker)
+    end
+
+    describe "connects with Airtable" do
+      let(:airtable_author_responses_table) { double(create: true) }
+      let(:packages_table) { double(all: []) }
+
+      before do
+        expect(Airrecord).to receive(:table).once.with("ABC", "123", "packages").and_return(packages_table)
+      end
+
+      it "should create author-response entry" do
+        expected_airtable_query = "{package-name} = 'great-package'"
+        expect(packages_table).to receive(:all).with({filter: expected_airtable_query}).and_return([OpenStruct.new({id: 33})])
+
+        expect(Airrecord).to receive(:table).once.with("ABC", "123", "author-responses").and_return(airtable_author_responses_table)
+
+        expected_values = { id_no: "great-package 123456789",
+                            response_date: Time.now.strftime("%Y-%m-%d"),
+                            package: [33],
+                            response_url: "https://github.com/ropensci/testing/issues/32#issuecomment-123456789" }
+        expect(airtable_author_responses_table).to receive(:create).with(expected_values)
+
+        @worker.submit_author_response
+      end
+
+      it "should reply a success message" do
+        expected_airtable_query = "{package-name} = 'great-package'"
+        expect(packages_table).to receive(:all).with({filter: expected_airtable_query}).and_return([OpenStruct.new({id: 33})])
+        expect(Airrecord).to receive(:table).once.with("ABC", "123", "author-responses").and_return(airtable_author_responses_table)
+        expect(@worker).to receive(:respond).with("Logged author response!")
+
+        @worker.submit_author_response
+      end
+
+      it "should reply a warning message if no package entry" do
+        expected_airtable_query = "{package-name} = 'great-package'"
+        expect(packages_table).to receive(:all).with({filter: expected_airtable_query}).and_return([])
+
+
+        expect(@worker).to receive(:respond).with("Couldn't find entry for _great-package_ in the packages log")
+        @worker.submit_author_response
       end
     end
   end

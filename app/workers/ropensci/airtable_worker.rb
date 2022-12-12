@@ -18,6 +18,8 @@ module Ropensci
         remove_reviewer
       when :submit_review
         submit_review(config)
+      when :submit_author_response
+        submit_author_response
       when :slack_invites
         slack_invites
       when :clear_assignments
@@ -114,6 +116,20 @@ module Ropensci
         end
       else
         respond("Couldn't find entry for _#{reviewer}_ in the reviews log")
+      end
+    end
+
+    def submit_author_response
+      package_entry = airtable_packages.all(filter: "{package-name} = '#{params.package_name}'").first
+      if package_entry
+        airtable_author_responses.create(id_no: params.author_response_id,
+                                         response_date: params.submitting_date,
+                                         package: [package_entry.id],
+                                         response_url: params.author_response_url)
+
+        respond("Logged author response!")
+      else
+        respond("Couldn't find entry for _#{params.package_name}_ in the packages log")
       end
     end
 
@@ -214,6 +230,10 @@ module Ropensci
 
     def airtable_packages
       @airtable_packages_table ||= Airrecord.table(airtable_config[:api_key], airtable_config[:base_id], "packages")
+    end
+
+    def airtable_author_responses
+      @airtable_author_responses_table ||= Airrecord.table(airtable_config[:api_key], airtable_config[:base_id], "author-responses")
     end
 
     def name_or_github_login(gh_user)
