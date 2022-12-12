@@ -1,4 +1,5 @@
 require_relative "../../spec_helper.rb"
+require "date"
 
 describe Ropensci::AirtableWorker do
 
@@ -181,7 +182,9 @@ describe Ropensci::AirtableWorker do
                                         review_time: "9.5",
                                         review_date: Time.now.to_s,
                                         review_url: "review-url",
-                                        reviewers: "@reviewer21, @reviewer42"})
+                                        reviewers: "@reviewer21, @reviewer42",
+                                        package_name: "great_package",
+                                        package_authors: ["@first-author", "@other_author"] })
       @worker.airtable_config = {api_key: "ABC", base_id: "123"}
       @responder_config = OpenStruct.new({ label_when_all_reviews_in: "4/review-in-awaiting-changes",
                                            unlabel_when_all_reviews_in: "3/reviewer(s)-assigned" })
@@ -231,7 +234,7 @@ describe Ropensci::AirtableWorker do
         @worker.submit_review({})
       end
 
-      it "should update label when number of reviews and reviewers is the same" do
+      it "should update label when number of reviews and reviewers is the same and set reminder for authors" do
         reviewer_query = "AND({github} = 'reviewer21', {id_no} = '33')"
         expect(reviews_table).to receive(:all).with({filter: reviewer_query}).and_return([review_in_airtable])
         expect(Airrecord).to receive(:table).once.with("ABC", "123", "packages").and_return(packages_table)
@@ -243,6 +246,15 @@ describe Ropensci::AirtableWorker do
 
         expect(@worker).to receive(:label_issue).with(["4/review-in-awaiting-changes"])
         expect(@worker).to receive(:unlabel_issue).with("3/reviewer(s)-assigned")
+
+        expected_locals = {"issue_id"=>"33", "repo"=>"testing/new_package"}
+        expected_reminder = "@first-author, @other_author: please post your response with `@ropensci-review-bot submit response <url to issue comment>`.\n\nHere's the author guide for response. https://devguide.ropensci.org/authors-guide.html"
+        expect(AsyncMessageWorker).to receive(:perform_at) do |msg_scheduled_at, msg_locals, msg_text|
+          expect(msg_scheduled_at.to_date).to eq((Time.now + (12*84600)).to_date)
+          expect(msg_locals).to eq(expected_locals)
+          expect(msg_text).to eq(expected_reminder)
+        end
+
         @worker.submit_review(@responder_config)
       end
 

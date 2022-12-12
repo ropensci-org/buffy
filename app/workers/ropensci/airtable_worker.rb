@@ -104,6 +104,9 @@ module Ropensci
 
           if finished_reviews_count == reviewers.size
             label_issue(add_labels) unless add_labels.empty?
+
+            set_reminder_for_authors_response(params.package_authors) unless params.package_authors.empty?
+
             unless remove_labels.empty?
               remove_labels.each {|label| unlabel_issue(label)}
             end
@@ -220,5 +223,14 @@ module Ropensci
         return gh_user.name
       end
     end
+
+    def set_reminder_for_authors_response(author_list)
+      schedule_at = Time.now + (12 * 86400) # 12 days from now
+      reminder_txt = "#{author_list.join(', ')}: please post your response with `@ropensci-review-bot submit response <url to issue comment>`.\n\nHere's the author guide for response. https://devguide.ropensci.org/authors-guide.html"
+
+      reminder_locals = {"issue_id" => context.issue_id, "repo" => context.repo}
+
+      AsyncMessageWorker.perform_at(schedule_at, reminder_locals, reminder_txt)
+     end
   end
 end
