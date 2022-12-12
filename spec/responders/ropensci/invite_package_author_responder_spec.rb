@@ -62,10 +62,10 @@ describe Ropensci::InvitePackageAuthorResponder do
 
     it "should create a job to send the invitation" do
       expect(Ropensci::ApprovedPackageWorker).to receive(:perform_async).
-                                                 with(:invite_author_to_transfered_repo,
+                                                 with("invite_author_to_transfered_repo",
                                                       @responder.params,
                                                       @responder.locals,
-                                                      {package_author: "author", package_name: "ropensci/great-package"})
+                                                      {"package_author" => "author", "package_name" => "ropensci/great-package"})
 
       @responder.process_message(@msg)
     end

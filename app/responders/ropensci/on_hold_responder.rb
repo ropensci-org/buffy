@@ -12,7 +12,7 @@ module Ropensci
 
     def process_message(message)
       label_issue([on_hold_label])
-      Ropensci::OnHoldReminderWorker.perform_at(reminder_at, locals, {"on_hold_label" => on_hold_label})
+      Ropensci::OnHoldReminderWorker.perform_at(reminder_at, serializable(locals), {"on_hold_label" => on_hold_label})
       respond("Submission on hold!")
     end
 

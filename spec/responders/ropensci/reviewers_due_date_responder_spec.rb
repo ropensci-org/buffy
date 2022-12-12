@@ -173,15 +173,15 @@ describe Ropensci::ReviewersDueDateResponder do
         end
 
         it "should create a ReminderReviewDeadlineWorker with correct info" do
-          expected_locals = { bot_name: "ropensci-review-bot",
-                              issue_id: 32,
-                              match_data_1: "add",
-                              match_data_2: "@xuanxu",
-                              match_data_3: "to reviewers",
-                              repo: "openjournals/testing",
-                              sender: "editor",
-                              issue_author: "opener"}
-          expected_params = { days_before_deadline: 2, template_file: "reminder.md", reviewer: "@xuanxu"}
+          expected_locals = { "bot_name" => "ropensci-review-bot",
+                              "issue_id" => 32,
+                              "match_data_1" => "add",
+                              "match_data_2" => "@xuanxu",
+                              "match_data_3" => "to reviewers",
+                              "repo" => "openjournals/testing",
+                              "sender" => "editor",
+                              "issue_author" => "opener"}
+          expected_params = { "days_before_deadline" => 2, "template_file" => "reminder.md", "reviewer" => "@xuanxu"}
 
           expect(Ropensci::ReminderReviewDeadlineWorker).to receive(:perform_at).with(days_before_date(2, @new_due_date), expected_locals, expected_params)
           @responder.process_message(@msg)
@@ -190,7 +190,7 @@ describe Ropensci::ReviewersDueDateResponder do
         it "should not be created if date in the past" do
           @responder.params[:reminder] = { days_before_deadline: 33, template_file: "reminder.md"}
 
-          expect(Ropensci::ReminderReviewDeadlineWorker).to_not receive(:perform_async)
+          expect(Ropensci::ReminderReviewDeadlineWorker).to_not receive(:perform_at)
           @responder.process_message(@msg)
         end
       end

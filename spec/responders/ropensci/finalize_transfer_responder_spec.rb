@@ -54,10 +54,10 @@ describe Ropensci::FinalizeTransferResponder do
 
     it "should create a job to finalize transfer" do
       expect(Ropensci::ApprovedPackageWorker).to receive(:perform_async).
-                                                 with(:finalize_transfer,
+                                                 with("finalize_transfer",
                                                       @responder.params,
                                                       @responder.locals,
-                                                      {package_author: "opener", package_name: "great-package"})
+                                                      {"package_author" => "opener", "package_name" => "great-package"})
 
       @responder.process_message(@msg)
     end

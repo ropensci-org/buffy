@@ -10,7 +10,7 @@ module Ropensci
 
     def process_message(message)
       return unless verify_package
-      Ropensci::ApprovedPackageWorker.perform_async(:invite_author_to_transfered_repo, params, locals, { package_name: @package_name, package_author: @package_author })
+      Ropensci::ApprovedPackageWorker.perform_async("invite_author_to_transfered_repo", serializable(params), serializable(locals), serializable({ package_name: @package_name, package_author: @package_author }))
     end
 
     def verify_package

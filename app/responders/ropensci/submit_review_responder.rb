@@ -47,7 +47,7 @@ module Ropensci
                       reviewers: reviewers,
                       package_name: package_name
                     }
-      Ropensci::AirtableWorker.perform_async(:submit_review, params, locals, review_data)
+      Ropensci::AirtableWorker.perform_async("submit_review", serializable(params), serializable(locals), serializable(review_data))
     end
 
     def default_description
