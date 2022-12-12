@@ -15,6 +15,10 @@ buffy:
         - editors
       label_when_all_reviews_in: "4/review(s)-in-awaiting-changes"
       unlabel_when_all_reviews_in: "3/reviewer(s)-assigned"
+    ropensci_submit_author_response:
+      authorized_roles_in_issue:
+        - author1
+        - author-others
     help:
     hello:
       hidden: true
