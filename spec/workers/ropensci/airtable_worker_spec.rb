@@ -253,7 +253,7 @@ describe Ropensci::AirtableWorker do
         expect(@worker).to receive(:unlabel_issue).with("3/reviewer(s)-assigned")
 
         expected_locals = {"issue_id"=>"33", "repo"=>"testing/new_package"}
-        expected_reminder = "@first-author, @other_author: please post your response with `@ropensci-review-bot submit response <url to issue comment>`.\n\nHere's the author guide for response. https://devguide.ropensci.org/authors-guide.html"
+        expected_reminder = "@first-author, @other_author: please post your response with `@ropensci-review-bot submit response <url to issue comment>` if you haven't done so already (this is an automatic reminder).\n\nHere's the author guide for response. https://devguide.ropensci.org/authors-guide.html"
         expect(AsyncMessageWorker).to receive(:perform_at) do |msg_scheduled_at, msg_locals, msg_text|
           expect(msg_scheduled_at.to_date).to eq((Time.now + (12*84600)).to_date)
           expect(msg_locals).to eq(expected_locals)

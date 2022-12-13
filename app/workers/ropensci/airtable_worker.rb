@@ -246,7 +246,7 @@ module Ropensci
 
     def set_reminder_for_authors_response(author_list)
       schedule_at = Time.now + (12 * 86400) # 12 days from now
-      reminder_txt = "#{author_list.join(', ')}: please post your response with `@ropensci-review-bot submit response <url to issue comment>`.\n\nHere's the author guide for response. https://devguide.ropensci.org/authors-guide.html"
+      reminder_txt = "#{author_list.join(', ')}: please post your response with `@ropensci-review-bot submit response <url to issue comment>` if you haven't done so already (this is an automatic reminder).\n\nHere's the author guide for response. https://devguide.ropensci.org/authors-guide.html"
 
       reminder_locals = {"issue_id" => context.issue_id, "repo" => context.repo}
 
