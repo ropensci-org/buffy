@@ -36,6 +36,7 @@ describe Ropensci::SubmitReviewResponder do
   describe "#process_message" do
     before do
       @issue_body = "... <!--reviewers-list-->@reviewer1, @reviewer2<!--end-reviewers-list--> ..." +
+                    "... <!--author1-->@first-author<!--end-author1--> <!--author-others-->@otherauthor<!--end-author-others-->..." +
                     "<!--repourl-->https://github.com/scientific/test-software<!--end-repourl-->"
       @valid_comment_url = "https://github.com/ropensci/testing/issues/32#issuecomment-12345678"
 
@@ -106,7 +107,8 @@ describe Ropensci::SubmitReviewResponder do
                                "review_time" => "10.5",
                                "review_url" => @valid_comment_url,
                                "reviewers" => "@reviewer1, @reviewer2",
-                               "package_name" => "test-software"
+                               "package_name" => "test-software",
+                               "package_authors" => ["@first-author", "@otherauthor"]
                              }
 
       @responder.match_data = @responder.event_regex.match(msg)

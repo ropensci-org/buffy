@@ -1,7 +1,7 @@
 ROpenSci :: Submit review
 =========================
 
-This responder can be used to update Airtable entries with a review url, duration and date in the reviews table.
+This responder can be used to update Airtable entries with a review url, duration and date in the reviews table. Once the number of reviews in Airtable equals the number of reviewers in the issue a message will be configured for 12 days later to remind authors to submit their response.
 
 ## Listens to
 
