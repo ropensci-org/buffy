@@ -46,6 +46,8 @@ buffy:
             - "Our Code of Conduct can be found at https://ropensci.org/code-of-conduct/"
       - check_readme:
         command: check readme
+        only:
+          - editors
         description: Checks peer-review badge is in README.md
         external_call:
           name: badge
