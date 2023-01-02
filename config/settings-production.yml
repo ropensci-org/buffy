@@ -151,6 +151,9 @@ buffy:
       - srrcheck:
           only:
             - editors
+          authorized_roles_in_issue:
+            - author1
+            - author-others
           command: check srr
           description: Checks srr documentation for stats packages
           url: http://138.68.123.59:8000/srrcheck
