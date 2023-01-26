@@ -103,7 +103,7 @@ describe Ropensci::SubmitReviewResponder do
                           "match_data_3" => "hours"
                         }
       expected_review_data = { "reviewer" => "reviewer1",
-                               "review_date" => comment_created_at,
+                               "review_date" => comment_created_at.to_s,
                                "review_time" => "10.5",
                                "review_url" => @valid_comment_url,
                                "reviewers" => "@reviewer1, @reviewer2",
