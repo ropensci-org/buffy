@@ -3,7 +3,7 @@ GEM
   specs:
     addressable (2.8.1)
       public_suffix (>= 2.0.2, < 6.0)
-    airrecord (1.0.10)
+    airrecord (1.0.12)
       faraday (>= 1.0, < 3.0)
       faraday-net_http_persistent
       net-http-persistent
@@ -13,7 +13,7 @@ GEM
     charlock_holmes (0.7.7)
     chronic (0.10.2)
     concurrent-ruby (1.2.2)
-    connection_pool (2.3.0)
+    connection_pool (2.4.0)
     crack (0.4.5)
       rexml
     diff-lcs (1.5.0)
@@ -50,7 +50,7 @@ GEM
     multi_json (1.15.0)
     mustermann (3.0.0)
       ruby2_keywords (~> 0.0.1)
-    net-http-persistent (4.0.1)
+    net-http-persistent (4.0.2)
       connection_pool (~> 2.2)
     nio4r (2.5.8)
     nokogiri (1.14.2)
