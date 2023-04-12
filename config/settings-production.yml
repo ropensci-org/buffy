@@ -3,99 +3,185 @@ buffy:
     bot_github_user: <%= ENV['BUFFY_BOT_GH_USER'] %>
     gh_access_token: <%= ENV['BUFFY_GH_ACCESS_TOKEN'] %>
     gh_secret_token: <%= ENV['BUFFY_GH_SECRET_TOKEN'] %>
+    airtable_api_key: <%= ENV['AIRTABLE_API_KEY'] %>
+    airtable_base_id: <%= ENV['AIRTABLE_BASE_ID'] %>
   teams:
-    editors: 3824115
+    editors: 2376878
+    empty: 4475893
+    software-review-testing: 4476094
   responders:
+    ropensci_submit_reviews:
+      only:
+        - editors
+      label_when_all_reviews_in: "4/review(s)-in-awaiting-changes"
+      unlabel_when_all_reviews_in: "3/reviewer(s)-assigned"
+    ropensci_submit_author_response:
+      authorized_roles_in_issue:
+        - author1
+        - author-others
     help:
     hello:
       hidden: true
     thanks:
       hidden: true
+    welcome:
+      if:
+        value_matches:
+          submission-type: "Standard|Estándar|Stats"
+      message: "Thanks for submitting to rOpenSci, our editors and @ropensci-review-bot will reply soon. Type `@ropensci-review-bot help` for help."
+      external_service:
+        name: editorcheck
+        url: http://138.68.123.59:8000/editorcheck
+        method: get
+        data_from_issue:
+          - repo
+          - repourl
+          - issue_id
+        template_file: goodpractice.md
     basic_command:
       - code_of_conduct:
           command: code of conduct
-          description: Show our community Code of Conduct and Guidelines
+          description: Show our Code of Conduct
           messages:
-            - "Our CoC: https://github.com/openjournals/joss/blob/master/CODE_OF_CONDUCT.md"
-            - "It's adapted from the Contributor Covenant: http://contributor-covenant.org"
-            - "Reports of abusive or harassing behavior may be reported to reports@theoj.org"
-    reviewers_list:
-      only: editors
-    assign_editor:
-      only: editors
-    remove_editor:
-      only: editors
-      no_editor_text: "TBD"
-    invite:
-      only: editors
-    add_remove_assignee:
-      only: editors
-    list_team_members:
-      command: list editors
-      team_id: 3824115
-      heading: Current journal editors
-    check_references:
-    repo_checks:
-    set_value:
-      - version:
-          only: editors
-          sample_value: "v1.0.0"
-      - archive:
-          only: editors
-          sample_value: "10.21105/joss.12345"
-    label_command:
-      - review_ok:
-          only: editors
-          command: review successful
-          add_labels:
-            - reviewed
-            - recommend publication
-            - pending publication
-          remove_labels:
-            - ongoing
-            - pending review
-      - review_nok:
-          only: editors
-          command: review failed
-          add_labels:
-            - recommend rejection
-    welcome:
-      template_file: welcome.md
-      data_from_issue:
-        - repository
-    close_issue_command:
-      only: editors
-      command: reject
+            - "Our Code of Conduct can be found at https://ropensci.org/code-of-conduct/"
+      - check_readme:
+          command: check readme
+          only:
+            - editors
+          description: Checks peer-review badge is in README.md
+          external_call:
+            name: badge
+            url: http://138.68.123.59:8000/badge
+            method: get
+            data_from_issue:
+              - repo
+              - repourl
+              - issue_id
+    ropensci_seeking_reviewers:
+      only:
+        - editors
+      template_file: badge.md
+      remove_labels:
+        - 1/editor-checks
       add_labels:
-        - rejected
+        - 2/seeking-reviewer(s)
+    ropensci_approve:
+      only: editors
+      external_service:
+        name: badge
+        url: http://138.68.123.59:8000/badge
+        method: get
+        data_from_issue:
+          - repo
+          - repourl
+          - issue_id
+      template_file: approved.md
+      data_from_issue:
+        - reviewers-list
+      remove_labels:
+        - 5/awaiting-reviewer(s)-response
+      add_labels:
+        - 6/approved
+    ropensci_invite_author:
+    ropensci_finalize_transfer:
+    ropensci_mint:
+      only: editors
+    ropensci_reviewers:
+      only:
+        - editors
+      if:
+        role_assigned: editor
+        reject_msg: "Can't assign reviewer because there is no editor assigned for this submission yet"
+      no_reviewer_text: "TBD"
+      add_labels:
+        - 3/reviewer(s)-assigned
+      remove_labels:
+        - 2/seeking-reviewer(s)
+      reminder:
+        days_before_deadline: 2
+        template_file: reminder.md
+    assign_editor:
+      message: "The editor guide can be found at https://devguide.ropensci.org/editorguide.html#editorchecklist"
+      only:
+        - editors
+      add_labels:
+        - 1/editor-checks
+      remove_labels:
+        - 0/editorial-team-prep
+    ropensci_on_hold:
+      only: editors
+      on_hold_days: 90
+    remove_editor:
+      only:
+        - editors
+      no_editor_text: "TBD"
+    ropensci_set_due_date:
+      only:
+        - editors
+    close_issue_command:
+      - out_of_scope:
+          only:
+            - editors
+          command: out of scope
+          add_labels:
+            - out-of-scope
+          remove_labels:
+            - 1/editor-checks
+
     external_service:
-      - code_quality:
-          only: editors
-          command: analyze code
-          description: Reports on the quality of the code
-          message: Inspecting code...
-          url: https://dummy-external-service.herokuapp.com/code-analysis
-          method: post
-          query_params:
-            secret: A1234567890Z
-          data_from_issue:
-            - target-repository
-          mapping:
-            target_url: target-repository
-          headers:
-            Authorization: OAUTH-token 123456
-            Time-Zone: Europe/Amsterdam
-      - cat_facts:
-          command: tell me something about cats
-          description: Random facts about cats
-          url: "https://cat-fact.herokuapp.com/facts/random"
+      - editorcheck:
+          only:
+            - editors
+          authorized_roles_in_issue:
+            - author1
+            - author-others
+            - reviewers-list
+          command: check package
+          description: Various package checks
+          message: Thanks, about to send the query.
+          url: http://138.68.123.59:8000/editorcheck
           method: get
           query_params:
-              animal_type: cat
-              amount: 1
-          template_file: cats.md
-    reviewer_checklist_comment:
-      template_file: reviewer_checklist.md
-      data_from_issue:
-        - target-repository
-        - author-handle
+            secret: <%= ENV['PKGCHECK_TOKEN'] %>
+          data_from_issue:
+            - repo
+            - repourl
+            - issue_id
+          template_file: goodpractice.md
+      - srrcheck:
+          only:
+            - editors
+          authorized_roles_in_issue:
+            - author1
+            - author-others
+          command: check srr
+          description: Checks srr documentation for stats packages
+          url: http://138.68.123.59:8000/srrcheck
+          method: get
+          query_params:
+            secret: <%= ENV['PKGCHECK_TOKEN'] %>
+          data_from_issue:
+            - repo
+            - repourl
+            - issue_id
+          silent: true
+
+    initial_values:
+      if:
+        value_matches:
+          submission-type: "Standard|Estándar|Stats"
+      values:
+        - author1:
+          - heading: Submitting Author
+          - warn_if_empty: true
+        - reviewers-list
+        - repourl:
+          - heading: Repository
+          - warn_if_empty: true
+        - submission-type:
+          - heading: Submission Type
+            warn_if_empty: true
+        - editor
+        - language:
+          - heading: Language Code
+            warn_if_empty: true
