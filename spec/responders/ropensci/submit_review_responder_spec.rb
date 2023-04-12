@@ -37,7 +37,8 @@ describe Ropensci::SubmitReviewResponder do
     before do
       @issue_body = "... <!--reviewers-list-->@reviewer1, @reviewer2<!--end-reviewers-list--> ..." +
                     "... <!--author1-->@first-author<!--end-author1--> <!--author-others-->@otherauthor<!--end-author-others-->..." +
-                    "<!--repourl-->https://github.com/scientific/test-software<!--end-repourl-->"
+                    "<!--repourl-->https://github.com/scientific/test-software<!--end-repourl-->" +
+                    "<!--due-dates-list-->Due date for @reviewer1: 2023-04-04\nDue date for @reviewer2: 2023-04-11<!--end-due-dates-list-->"
       @valid_comment_url = "https://github.com/ropensci/testing/issues/32#issuecomment-12345678"
 
       disable_github_calls_for(@responder)
@@ -118,6 +119,20 @@ describe Ropensci::SubmitReviewResponder do
                                                                        expected_review_data)
       expect(@responder).to receive(:issue_comment).and_return(comment)
       expect(@responder).to_not receive(:respond)
+
+      @responder.process_message(msg)
+    end
+
+    it "should remove the due-date entry for the reviewer" do
+      msg = message_with(@valid_comment_url, "10.5 hours")
+      comment = double(created_at: Time.now, user: double(login: "reviewer1"))
+
+      @responder.match_data = @responder.event_regex.match(msg)
+      expect(@responder).to receive(:issue_comment).and_return(comment)
+      expect(Ropensci::AirtableWorker).to receive(:perform_async)
+      expect(@responder).to_not receive(:respond)
+
+      expect(@responder).to receive(:update_list).with("due-dates", "Due date for @reviewer2: 2023-04-11")
 
       @responder.process_message(msg)
     end

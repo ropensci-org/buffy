@@ -50,6 +50,14 @@ module Ropensci
                       package_authors: all_authors.map(&:strip).uniq.compact
                     }
       Ropensci::AirtableWorker.perform_async("submit_review", serializable(params), serializable(locals), serializable(review_data))
+
+      remove_due_date_entry(reviewer)
+    end
+
+    def remove_due_date_entry(reviewer)
+      list_of_due_dates = read_value_from_body("due-dates-list").strip.split("\n").map(&:strip)
+      list_of_due_dates = list_of_due_dates.delete_if {|entry| entry.match?(/^Due date for @#{user_login(reviewer)}:/)}
+      update_list("due-dates", list_of_due_dates.join("\n"))
     end
 
     def default_description
