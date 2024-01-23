@@ -19,6 +19,8 @@ buffy:
       authorized_roles_in_issue:
         - author1
         - author-others
+      remove_labels:
+        - 4/review(s)-in-awaiting-changes
     help:
     hello:
       hidden: true
@@ -80,6 +82,7 @@ buffy:
         - reviewers-list
       remove_labels:
         - 5/awaiting-reviewer(s)-response
+        - 4/review(s)-in-awaiting-changes
       add_labels:
         - 6/approved
     ropensci_invite_author:
