@@ -82,6 +82,7 @@ buffy:
         - reviewers-list
       remove_labels:
         - 5/awaiting-reviewer(s)-response
+        - 4/review(s)-in-awaiting-changes
       add_labels:
         - 6/approved
     ropensci_invite_author:
