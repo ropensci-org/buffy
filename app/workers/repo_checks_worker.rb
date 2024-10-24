@@ -30,20 +30,13 @@ class RepoChecksWorker < BuffyWorker
     message = "```\nSoftware report:\n"
 
     cloc_result = run_cloc(path)
-    gitinspector_result = run_gitinspector(path)
 
     if cloc_result
       message << "#{cloc_result}"
     else
       message << "cloc failed to run analysis of the source code"
     end
-    message << "\n\n"
 
-    if gitinspector_result
-      message << "#{gitinspector_result}"
-    else
-      message << "gitinspector failed to run statistical information for the repository"
-    end
     message << "\n```"
 
     respond(message)
@@ -52,8 +45,8 @@ class RepoChecksWorker < BuffyWorker
   def detect_languages
     repo = Rugged::Repository.new(path)
     project = Linguist::Repository.new(repo, repo.head.target_id)
-
-    top_3 = project.languages.keys.take(3)
+    ordered_languages = project.languages.sort_by { |_, size| size }.reverse
+    top_3 = ordered_languages.first(3).map {|l,s| l}
     label_issue(top_3) unless top_3.empty?
   end
 

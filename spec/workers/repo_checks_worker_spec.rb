@@ -43,16 +43,10 @@ describe RepoChecksWorker do
   describe "#repo_summary" do
     before do
       allow(@worker).to receive(:run_cloc).and_return("Ruby 50%, Julia 50%")
-      allow(@worker).to receive(:run_gitinspector).and_return("Author: Buffy Summers")
     end
 
     it "should include cloc report" do
       expect(@worker).to receive(:respond).with(/Ruby 50%, Julia 50%/)
-      @worker.repo_summary
-    end
-
-    it "should include gitinspector report" do
-      expect(@worker).to receive(:respond).with(/Author: Buffy Summers/)
       @worker.repo_summary
     end
 
@@ -61,18 +55,12 @@ describe RepoChecksWorker do
       expect(@worker).to receive(:respond).with(/cloc failed to run/)
       @worker.repo_summary
     end
-
-    it "should include gitinspector report" do
-      expect(@worker).to receive(:run_gitinspector).and_return(nil)
-      expect(@worker).to receive(:respond).with(/gitinspector failed to run/)
-      @worker.repo_summary
-    end
   end
 
   describe "#detect_languages" do
     before do
       repo = OpenStruct.new(head: OpenStruct.new(target_id: 33))
-      expected_languages = OpenStruct.new(languages: {"Ruby"=>176110, "HTML"=>664, "TeX"=>475, "Go"=>21})
+      expected_languages = OpenStruct.new(languages: {"Go"=>21, "HTML"=>664, "Ruby"=>176110, "TeX"=>475, "XML" => 100})
       allow(Rugged::Repository).to receive(:new).and_return(repo)
       allow(Linguist::Repository).to receive(:new).with(repo, 33).and_return(expected_languages)
     end
