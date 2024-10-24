@@ -3,6 +3,10 @@ GEM
   specs:
     addressable (2.8.7)
       public_suffix (>= 2.0.2, < 7.0)
+    airrecord (1.0.12)
+      faraday (>= 1.0, < 3.0)
+      faraday-net_http_persistent
+      net-http-persistent
     base64 (0.2.0)
     bibtex-ruby (6.1.0)
       latex-decode (~> 0.0)
@@ -26,6 +30,9 @@ GEM
       faraday (>= 2, < 3)
     faraday-net_http (3.3.0)
       net-http
+    faraday-net_http_persistent (2.1.0)
+      faraday (~> 2.5)
+      net-http-persistent (~> 4.0)
     faraday-retry (2.2.1)
       faraday (~> 2.0)
     github-linguist (8.0.1)
@@ -53,6 +60,8 @@ GEM
       ruby2_keywords (~> 0.0.1)
     net-http (0.4.1)
       uri
+    net-http-persistent (4.0.2)
+      connection_pool (~> 2.2)
     nio4r (2.7.3)
     nokogiri (1.16.7)
       mini_portile2 (~> 2.8.2)
@@ -132,6 +141,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  airrecord
   bibtex-ruby
   chronic
   faraday
@@ -150,6 +160,9 @@ DEPENDENCIES
   sinatra (= 4.0.0)
   sinatra-contrib (= 4.0.0)
   webmock
+
+RUBY VERSION
+   ruby 3.3.3p89
 
 BUNDLED WITH
    2.5.14
