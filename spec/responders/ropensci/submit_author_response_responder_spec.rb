@@ -39,6 +39,7 @@ describe Ropensci::SubmitAuthorResponseResponder do
       allow(@responder).to receive(:issue_body).and_return(@issue_body)
       @responder.context = OpenStruct.new(issue_id: 32,
                                           issue_author: "opener",
+                                          issue_title: "Issue 1 title",
                                           repo: "ropensci/testing",
                                           sender: "author1")
     end
@@ -73,15 +74,16 @@ describe Ropensci::SubmitAuthorResponseResponder do
       expected_params = {}
       expected_locals = { "bot_name" => "ropensci-review-bot",
                           "issue_author" => "opener",
+                          "issue_title" => "Issue 1 title",
                           "issue_id" => 32,
                           "repo" => "ropensci/testing",
                           "sender" => "author1",
                           "match_data_1" => @valid_comment_url
                         }
       expected_data = { "author_response_id" => "test-software 12345678",
-                               "author_response_url" => "https://github.com/ropensci/testing/issues/32#issuecomment-12345678",
-                               "submitting_date" => Time.now.strftime("%Y-%m-%d"),
-                               "package_name" => "test-software" }
+                        "author_response_url" => "https://github.com/ropensci/testing/issues/32#issuecomment-12345678",
+                        "submitting_date" => Time.now.strftime("%Y-%m-%d"),
+                        "package_name" => "test-software" }
 
       @responder.match_data = @responder.event_regex.match(msg)
       expect(Ropensci::AirtableWorker).to receive(:perform_async).with("submit_author_response",

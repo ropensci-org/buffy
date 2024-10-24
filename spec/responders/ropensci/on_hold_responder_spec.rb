@@ -28,6 +28,7 @@ describe Ropensci::OnHoldResponder do
       disable_github_calls_for(@responder)
       @responder.context = OpenStruct.new(issue_id: 32,
                                           issue_author: "the-author",
+                                          issue_title: "A new issue",
                                           repo: "openjournals/testing",
                                           sender: "the-editor")
       @msg = "@ropensci-review-bot put on hold"
@@ -55,7 +56,7 @@ describe Ropensci::OnHoldResponder do
       expect(Time).to receive(:now).and_return(time_now)
 
       expected_params = { "on_hold_label" => "holding"}
-      expected_locals = {"bot_name"=>"ropensci-review-bot", "issue_author"=>"the-author", "issue_id"=>32, "repo"=>"openjournals/testing", "sender"=>"the-editor"}
+      expected_locals = {"bot_name"=>"ropensci-review-bot", "issue_author"=>"the-author", "issue_title"=>"A new issue", "issue_id"=>32, "repo"=>"openjournals/testing", "sender"=>"the-editor"}
       expected_time = time_now + (90 * 86400)
 
       expect(Ropensci::OnHoldReminderWorker).to receive(:perform_at).with(expected_time, expected_locals, expected_params)
@@ -69,7 +70,7 @@ describe Ropensci::OnHoldResponder do
       expect(Time).to receive(:now).and_return(time_now)
 
       expected_params = { "on_hold_label" => "holding"}
-      expected_locals = {"bot_name"=>"ropensci-review-bot", "issue_author"=>"the-author", "issue_id"=>32, "repo"=>"openjournals/testing", "sender"=>"the-editor"}
+      expected_locals = {"bot_name"=>"ropensci-review-bot", "issue_author"=>"the-author", "issue_title"=>"A new issue", "issue_id"=>32, "repo"=>"openjournals/testing", "sender"=>"the-editor"}
       expected_time = time_now + (27 * 86400)
 
       expect(Ropensci::OnHoldReminderWorker).to receive(:perform_at).with(expected_time, expected_locals, expected_params)

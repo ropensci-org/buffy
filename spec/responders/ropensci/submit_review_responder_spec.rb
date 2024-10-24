@@ -45,6 +45,7 @@ describe Ropensci::SubmitReviewResponder do
       allow(@responder).to receive(:issue_body).and_return(@issue_body)
       @responder.context = OpenStruct.new(issue_id: 32,
                                           issue_author: "opener",
+                                          issue_title: "Title A",
                                           repo: "ropensci/testing",
                                           sender: "xuanxu")
     end
@@ -96,6 +97,7 @@ describe Ropensci::SubmitReviewResponder do
       expected_params = { "all_reviews_label" => "4/review-in-awaiting-changes" }
       expected_locals = { "bot_name" => "ropensci-review-bot",
                           "issue_author" => "opener",
+                          "issue_title" => "Title A",
                           "issue_id" => 32,
                           "repo" => "ropensci/testing",
                           "sender" => "xuanxu",

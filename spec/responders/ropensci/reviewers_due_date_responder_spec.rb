@@ -48,6 +48,7 @@ describe Ropensci::ReviewersDueDateResponder do
                                           issue_author: "opener",
                                           repo: "openjournals/testing",
                                           sender: "editor",
+                                          issue_title: "Test submission",
                                           issue_body: "Test Submission\n\n ... description ... \n\n" +
                                                       "<!--author1-->@first_author<!--end-author1-->\n" +
                                                       "<!--author-others-->@second_author, @third_author<!--end-author-others-->\n" +
@@ -175,6 +176,7 @@ describe Ropensci::ReviewersDueDateResponder do
         it "should create a ReminderReviewDeadlineWorker with correct info" do
           expected_locals = { "bot_name" => "ropensci-review-bot",
                               "issue_id" => 32,
+                              "issue_title" => "Test submission",
                               "match_data_1" => "add",
                               "match_data_2" => "@xuanxu",
                               "match_data_3" => "to reviewers",
@@ -338,6 +340,7 @@ describe Ropensci::ReviewersDueDateResponder do
       @expected_params = { "no_reviewer_text" => "TBD" }
       @expected_locals = { "bot_name" => "ropensci-review-bot",
                            "issue_id" => 33,
+                           "issue_title" => "Bioinfo package",
                            "repo" => "openjournals/testing",
                            "sender" => "xuanxu",
                            "issue_author" => "@uthor"}
@@ -384,6 +387,7 @@ describe Ropensci::ReviewersDueDateResponder do
       @expected_params = { "no_reviewer_text" => "TBD" }
       @expected_locals = { "bot_name" => "ropensci-review-bot",
                            "issue_id" => 33,
+                           "issue_title" => "Bioinfo package",
                            "repo" => "openjournals/testing",
                            "sender" => "xuanxu",
                            "issue_author" => "@uthor"}
@@ -412,6 +416,7 @@ describe Ropensci::ReviewersDueDateResponder do
       @expected_params = { "no_reviewer_text" => "TBD" }
       @expected_locals = { "bot_name" => "ropensci-review-bot",
                            "issue_id" => 33,
+                           "issue_title" => "Bioinfo package",
                            "repo" => "openjournals/testing",
                            "sender" => "xuanxu",
                            "issue_author" => "@uthor"}
