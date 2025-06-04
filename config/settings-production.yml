@@ -7,12 +7,14 @@ buffy:
     airtable_base_id: <%= ENV['AIRTABLE_BASE_ID'] %>
   teams:
     editors: 2376878
+    stats-editors: 4968684
     empty: 4475893
     software-review-testing: 4476094
   responders:
     ropensci_submit_reviews:
       only:
         - editors
+        - stats-editors
       label_when_all_reviews_in: "4/review(s)-in-awaiting-changes"
       unlabel_when_all_reviews_in: "3/reviewer(s)-assigned"
     ropensci_submit_author_response:
@@ -51,6 +53,7 @@ buffy:
           command: check readme
           only:
             - editors
+            - stats-editors
           description: Checks peer-review badge is in README.md
           external_call:
             name: badge
@@ -63,13 +66,16 @@ buffy:
     ropensci_seeking_reviewers:
       only:
         - editors
+        - stats-editors
       template_file: badge.md
       remove_labels:
         - 1/editor-checks
       add_labels:
         - 2/seeking-reviewer(s)
     ropensci_approve:
-      only: editors
+      only:
+        - editors
+        - stats-editors
       external_service:
         name: badge
         url: http://138.68.123.59:8000/badge
@@ -88,10 +94,13 @@ buffy:
     ropensci_invite_author:
     ropensci_finalize_transfer:
     ropensci_mint:
-      only: editors
+      only:
+        - editors
+        - stats-editors
     ropensci_reviewers:
       only:
         - editors
+        - stats-editors
       if:
         role_assigned: editor
         reject_msg: "Can't assign reviewer because there is no editor assigned for this submission yet"
@@ -107,24 +116,30 @@ buffy:
       message: "The editor guide can be found at https://devguide.ropensci.org/editorguide.html#editorchecklist"
       only:
         - editors
+        - stats-editors
       add_labels:
         - 1/editor-checks
       remove_labels:
         - 0/editorial-team-prep
     ropensci_on_hold:
-      only: editors
+      only:
+        - editors
+        - stats-editors
       on_hold_days: 90
     remove_editor:
       only:
         - editors
+        - stats-editors
       no_editor_text: "TBD"
     ropensci_set_due_date:
       only:
         - editors
+        - stats-editors
     close_issue_command:
       - out_of_scope:
           only:
             - editors
+            - stats-editors
           command: out of scope
           add_labels:
             - out-of-scope
@@ -135,6 +150,7 @@ buffy:
       - editorcheck:
           only:
             - editors
+            - stats-editors
           authorized_roles_in_issue:
             - author1
             - author-others
@@ -154,6 +170,7 @@ buffy:
       - srrcheck:
           only:
             - editors
+            - stats-editors
           authorized_roles_in_issue:
             - author1
             - author-others
