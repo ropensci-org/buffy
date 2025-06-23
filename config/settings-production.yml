@@ -19,6 +19,10 @@ buffy:
       authorized_roles_in_issue:
         - author1
         - author-others
+      remove_labels:
+        - 4/review(s)-in-awaiting-changes
+      add_labels:
+        - 5/awaiting-reviewer(s)-response
     help:
     hello:
       hidden: true
