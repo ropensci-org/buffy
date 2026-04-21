@@ -241,8 +241,8 @@ describe WelcomeResponder do
     before do
       settings = { env: {bot_github_user: "botsci"} }
       services = [
-        { name: "service1", url: "http://example1.com", data_from_issue: ["extra-data"] },
-        { name: "service2", url: "http://example2.com" }
+        { service1: { url: "http://example1.com", data_from_issue: ["extra-data"] }},
+        { service2: { url: "http://example2.com" }}
       ]
       @responder = subject.new(settings, {external_service: services})
       @responder.context = OpenStruct.new(issue_id: 33,
