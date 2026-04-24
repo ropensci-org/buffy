@@ -33,7 +33,7 @@ buffy:
           # message: "⭐️ Thanks for submitting to rOpenSci.  We are taking a break for the holidays. Activities are currently paused until Jan 5th 2026. Please alert us here on or after that date to proceed with your submission. ⭐️"
           external_service:
             - pkgmatch:
-                url: http://138.68.123.59:8000/pkgmatch
+                url: https://reviewbot.ropensci.org/pkgmatch
                 method: get
                 data_from_issue:
                   - repo
@@ -41,7 +41,7 @@ buffy:
                   - issue_id
                 silent: true
             - editorcheck:
-                url: http://138.68.123.59:8000/editorcheck
+                url: https://reviewbot.ropensci.org/editorcheck
                 method: get
                 data_from_issue:
                   - repo
@@ -57,7 +57,7 @@ buffy:
             - "0/presubmission"
           external_service:
             name: pkgmatch
-            url: http://138.68.123.59:8000/pkgmatch
+            url: https://reviewbot.ropensci.org/pkgmatch
             method: get
             data_from_issue:
               - repourl
@@ -73,7 +73,7 @@ buffy:
             - "stats"
           external_service:
             name: pkgmatch
-            url: http://138.68.123.59:8000/pkgmatch
+            url: https://reviewbot.ropensci.org/pkgmatch
             method: get
             data_from_issue:
               - repourl
@@ -99,7 +99,7 @@ buffy:
           description: Checks peer-review badge is in README.md
           external_call:
             name: badge
-            url: http://138.68.123.59:8000/badge
+            url: https://reviewbot.ropensci.org/badge
             method: get
             data_from_issue:
               - repo
@@ -117,7 +117,7 @@ buffy:
       only: editors
       external_service:
         name: badge
-        url: http://138.68.123.59:8000/badge
+        url: https://reviewbot.ropensci.org/badge
         method: get
         data_from_issue:
           - repo
@@ -187,7 +187,7 @@ buffy:
           command: check package
           description: Various package checks
           message: Thanks, about to send the query.
-          url: http://138.68.123.59:8000/editorcheck
+          url: https://reviewbot.ropensci.org/editorcheck
           method: get
           query_params:
             secret: <%= ENV['PKGCHECK_TOKEN'] %>
@@ -201,7 +201,7 @@ buffy:
             - editors
           command: similar packages
           description: List similar packages from rOpenSci and CRAN
-          url: http://138.68.123.59:8000/pkgmatch
+          url: https://reviewbot.ropensci.org/pkgmatch
           method: get
           query_params:
             secret: <%= ENV['PKGCHECK_TOKEN'] %>
@@ -218,7 +218,7 @@ buffy:
             - author-others
           command: check srr
           description: Checks srr documentation for stats packages
-          url: http://138.68.123.59:8000/srrcheck
+          url: https://reviewbot.ropensci.org/srrcheck
           method: get
           query_params:
             secret: <%= ENV['PKGCHECK_TOKEN'] %>
