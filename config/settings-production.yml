@@ -156,6 +156,17 @@ buffy:
         - 1/editor-checks
       remove_labels:
         - 0/editorial-team-prep
+      external_service:
+        name: deactivate_search
+        url: https://reviewbot.ropensci.org/deactivate_search
+        method: get
+        query_params:
+          secret: <%= ENV['PKGCHECK_TOKEN'] %>
+        data_from_issue:
+          - repo
+          - repourl
+          - issue_id
+        silent: true
     ropensci_on_hold:
       only: editors
       on_hold_days: 90
@@ -219,6 +230,20 @@ buffy:
           command: check srr
           description: Checks srr documentation for stats packages
           url: https://reviewbot.ropensci.org/srrcheck
+          method: get
+          query_params:
+            secret: <%= ENV['PKGCHECK_TOKEN'] %>
+          data_from_issue:
+            - repo
+            - repourl
+            - issue_id
+          silent: true
+      - editorsearch:
+          only:
+            - editors
+          command: ping editors
+          description: Send emails to editorial board requesting volunteers
+          url: https://reviewbot.ropensci.org/send_search
           method: get
           query_params:
             secret: <%= ENV['PKGCHECK_TOKEN'] %>
