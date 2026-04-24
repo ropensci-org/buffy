@@ -251,7 +251,6 @@ buffy:
             - repo
             - repourl
             - issue_id
-          silent: true
 
     initial_values:
       if:
