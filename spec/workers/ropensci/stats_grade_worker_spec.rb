@@ -26,7 +26,7 @@ describe Ropensci::StatsGradesWorker do
     end
 
     it "should call default external service to get label" do
-      expected_url = "http://138.68.123.59:8000/stats_badge"
+      expected_url = "http://reviewbot.ropensci.org/stats_badge"
       expected_parameters = { repo: "ropensci/tests", issue_num: 12}
       expect(Faraday).to receive(:get).with(expected_url, expected_parameters, {}).and_return(@response_ok)
 

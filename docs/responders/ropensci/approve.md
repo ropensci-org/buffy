@@ -45,7 +45,7 @@ For the **Airtable** connection to work two parameters must be present in the `e
 ```
 
 For labeling the approved `stats` submissions an external service is used to get the proper versioned label.
-The url for the external service is by default: `http://138.68.123.59:8000/stats_badge`. This value can be changed using the optional `:stats_badge_url` param:
+The url for the external service is by default: `http://reviewbot.ropensci.org/stats_badge`. This value can be changed using the optional `:stats_badge_url` param:
 
 ```yaml
 ...
