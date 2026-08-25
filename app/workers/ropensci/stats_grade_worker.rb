@@ -15,7 +15,7 @@ module Ropensci
 
     def label
       parameters = { repo: context[:repo], issue_num: context[:issue_id] }
-      url = params.stats_badge_url || "http://138.68.123.59:8000/stats_badge"
+      url = params.stats_badge_url || "http://reviewbot.ropensci.org/stats_badge"
       headers = {}
 
       response = Faraday.get(url, parameters, headers)
