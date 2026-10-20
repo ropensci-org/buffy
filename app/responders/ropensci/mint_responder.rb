@@ -17,6 +17,7 @@ module Ropensci
       if valid_metal? && valid_submission_type?
           update_or_add_value("statsgrade", @metal, append: false, heading: "Badge grade")
           respond("Done, #{@metal} minted!")
+          label_issue([approved_label]) if params[:label_version]
           process_labeling
       else
         respond(@error_reply)
@@ -33,6 +34,10 @@ module Ropensci
       @error_reply = "Only submissions type: #{VALID_SUBMISSION_TYPES.join('/')} can be minted"
       submission_type = read_value_from_body("submission-type").downcase
       VALID_SUBMISSION_TYPES.include?(submission_type)
+    end
+
+    def approved_label
+      "6/approved-#{@metal}-#{params[:label_version]}"
     end
 
     def default_description

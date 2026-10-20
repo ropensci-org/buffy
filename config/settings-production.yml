@@ -146,6 +146,7 @@ buffy:
     ropensci_finalize_transfer:
     ropensci_mint:
       only: editors
+      label_version: v0.2
     ropensci_reviewers:
       only:
         - editors
