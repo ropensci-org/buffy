@@ -46,8 +46,23 @@ class WelcomeResponder < Responder
   end
 
   def external_service(service_params)
-    check_required_params(service_params)
-    process_external_service(service_params, locals)
+    return if service_params.nil? || service_params.empty?
+
+    external_services = []
+    if service_params.is_a?(Array)
+      service_params.each do |single_service|
+        single_service.each_pair do |service_name, service_config|
+          external_services << service_config.merge({ name: service_name.to_s})
+        end
+      end
+    else
+      external_services << service_params
+    end
+
+    external_services.each do |service_config|
+      check_required_params(service_config)
+      process_external_service(service_config, locals)
+    end
   end
 
   def check_required_params(service_params)
