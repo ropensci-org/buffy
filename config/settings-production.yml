@@ -109,6 +109,8 @@ buffy:
             name: badge
             url: https://reviewbot.ropensci.org/badge
             method: get
+            query_params:
+              secret: <%= ENV['PKGCHECK_TOKEN'] %>
             data_from_issue:
               - repo
               - repourl
@@ -127,6 +129,8 @@ buffy:
         name: badge
         url: https://reviewbot.ropensci.org/badge
         method: get
+        query_params:
+          secret: <%= ENV['PKGCHECK_TOKEN'] %>
         data_from_issue:
           - repo
           - repourl
