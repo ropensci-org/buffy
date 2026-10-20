@@ -8,7 +8,7 @@ describe Ropensci::MintResponder do
 
   before do
     settings = { env: {bot_github_user: "ropensci-review-bot"} }
-    params = {}
+    params = { label_version: "v0.2" }
     @responder = subject.new(settings, params)
   end
 
@@ -93,6 +93,46 @@ describe Ropensci::MintResponder do
       expect(@responder).to receive(:respond).with("Done, gold minted!")
 
       @responder.process_message(@msg)
+    end
+
+    it "should add approved label built from metal" do
+      @responder.match_data = @responder.event_regex.match(@msg)
+      allow(@responder).to receive(:issue_body).and_return(@issue_body)
+
+      expect(@responder).to receive(:label_issue).with(["6/approved-gold-v0.2"])
+
+      @responder.process_message(@msg)
+    end
+
+    it "should use label_version from params" do
+      responder = subject.new({ env: {bot_github_user: "ropensci-review-bot"} }, { label_version: "v1.0" })
+      disable_github_calls_for(responder)
+      responder.match_data = responder.event_regex.match("@ropensci-review-bot mint silver")
+      allow(responder).to receive(:issue_body).and_return(@issue_body)
+
+      expect(responder).to receive(:label_issue).with(["6/approved-silver-v1.0"])
+
+      responder.process_message("@ropensci-review-bot mint silver")
+    end
+
+    it "should not add approved label if label_version is not configured" do
+      responder = subject.new({ env: {bot_github_user: "ropensci-review-bot"} }, {})
+      disable_github_calls_for(responder)
+      responder.match_data = responder.event_regex.match(@msg)
+      allow(responder).to receive(:issue_body).and_return(@issue_body)
+
+      expect(responder).to_not receive(:label_issue)
+
+      responder.process_message(@msg)
+    end
+
+    it "should not add approved label if metal is invalid" do
+      msg = "@ropensci-review-bot mint lead"
+      @responder.match_data = @responder.event_regex.match(msg)
+
+      expect(@responder).to_not receive(:label_issue)
+
+      @responder.process_message(msg)
     end
 
     it "should process labeling" do
