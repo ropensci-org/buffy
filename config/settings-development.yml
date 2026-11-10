@@ -32,3 +32,6 @@ buffy:
         - pending review
     welcome:
       message: "Hi!, I'm @botsci, a friendly bot.\n\nType ```@botsci help``` to discover how I can help you."
+    ropensci_on_hold:
+      only: editors
+      on_hold_days: 30
