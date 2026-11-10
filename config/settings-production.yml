@@ -169,6 +169,7 @@ buffy:
         - 1/editor-checks
       remove_labels:
         - 0/editorial-team-prep
+        - editors-pinged
       external_service:
         name: deactivate_search
         url: https://reviewbot.ropensci.org/deactivate_search
@@ -255,6 +256,8 @@ buffy:
           only:
             - editors
           command: ping editors
+          add_labels:
+            - editors-pinged
           description: Send emails to editorial board requesting volunteers
           url: https://reviewbot.ropensci.org/send_search
           method: get
