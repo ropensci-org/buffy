@@ -46,4 +46,14 @@ Buffy includes a list of Responders that can be used by configuring them in the 
    :caption: Custom responders
    :maxdepth: 1
 
+   responders/ropensci/reviewers_due_date
+   responders/ropensci/set_due_date
+   responders/ropensci/seeking_reviewers
+   responders/ropensci/approve
+   responders/ropensci/finalize_transfer
+   responders/ropensci/invite_author
+   responders/ropensci/mint
+   responders/ropensci/submit_review
+   responders/ropensci/submit_author_response
+   responders/ropensci/on_hold
 ```
