@@ -1,0 +1,24 @@
+Package: buffyr
+Title: Smoke Tests for the rOpenSci Review Bot
+Version: 0.0.1
+Authors@R:
+    person("Maëlle", "Salmon", , "maelle@ropensci.org", role = c("aut", "cre"))
+Description: Runs the rOpenSci review bot commands on a test submission,
+    checks the replies, cleans up Airtable, and writes a markdown report.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Depends:
+    R (>= 4.4.0)
+Imports:
+    airtabler,
+    cli,
+    gh,
+    jsonlite,
+    keyring,
+    purrr (>= 1.0.0),
+    usethis,
+    withr
+Remotes:
+    bergant/airtabler
+Roxygen: list(markdown = TRUE)
+Config/roxygen2/version: 8.1.1.9000
